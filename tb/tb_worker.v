@@ -2,7 +2,7 @@
 
 module tb_worker #
   (
-   `include "param.vh"
+   `include "include/param.vh"
    );
       
    parameter CYCLE = 100;
@@ -18,7 +18,7 @@ module tb_worker #
    reg  WR_READY;
    wire [WORKER_RESULT_WIDTH-1:0] WR_DATA;
 
-   `include "construct.vh"
+   `include "include/construct.vh"
 
    worker w0 (.CLK(CLK), .RST(RST),
               .PC_VALID(PC_VALID), .PC_DATA(PC_DATA), .PC_READY(PC_READY),
@@ -36,14 +36,14 @@ module tb_worker #
 
    task initTest;
       begin
-         CLK =01;
+         CLK = 1;
          RST = 1;
          PC_VALID = 0;
          PC_DATA  = 0;
          WR_READY = 0;
 
          #CYCLE;
-         if (!(PC_READY == 0 && WR_VALID == 0))
+         if (!(PC_READY === 0 && WR_VALID === 0))
            raiseError('h00);
          RST = 0;
       end
@@ -58,7 +58,7 @@ module tb_worker #
       begin
          PC_VALID = 1;
          while (!(PC_VALID && PC_READY))
-        #CYCLE;
+           #CYCLE;
          #CYCLE;
          PC_VALID = 0;
       end
@@ -68,7 +68,7 @@ module tb_worker #
       begin
          WR_READY = 1;
          while (!(WR_VALID && WR_READY))
-        #CYCLE;
+           #CYCLE;
          #CYCLE;
          WR_READY = 0;
       end
@@ -98,12 +98,12 @@ module tb_worker #
          send;
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option1, dest_addr1, color, data1)))
+         if (!(WR_DATA === make_worker_result(dest_option1, dest_addr1, color, data1)))
            raiseError('h10);
 
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option2, dest_addr2, color, data1)))
+         if (!(WR_DATA === make_worker_result(dest_option2, dest_addr2, color, data1)))
            raiseError('h11);
       end
    endtask
@@ -135,7 +135,7 @@ module tb_worker #
          send;
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option1, dest_addr1, color, data1)))
+         if (!(WR_DATA === make_worker_result(dest_option1, dest_addr1, color, data1)))
            raiseError('h20);
 
          data2 = 32'h0; // false
@@ -153,7 +153,7 @@ module tb_worker #
          send;
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option2, dest_addr2, color, data1)))
+         if (!(WR_DATA === make_worker_result(dest_option2, dest_addr2, color, data1)))
            raiseError('h21);
       end
    endtask
@@ -181,7 +181,7 @@ module tb_worker #
          send;
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option1, dest_addr1, new_color, data1)))
+         if (!(WR_DATA === make_worker_result(dest_option1, dest_addr1, new_color, data1)))
            raiseError('h30);
       end
    endtask
@@ -211,12 +211,12 @@ module tb_worker #
          send;
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option1, dest_addr1, color, data1)))
+         if (!(WR_DATA === make_worker_result(dest_option1, dest_addr1, color, data1)))
            raiseError('h40);
 
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option2, dest_addr2, color, data2)))
+         if (!(WR_DATA === make_worker_result(dest_option2, dest_addr2, color, data2)))
            raiseError('h41);
       end
    endtask
@@ -244,7 +244,7 @@ module tb_worker #
          send;
          receive;
 
-         if (!(WR_DATA == make_worker_result(dest_option1, dest_addr1, color, data1 + data2)))
+         if (!(WR_DATA === make_worker_result(dest_option1, dest_addr1, color, data1 + data2)))
            raiseError('h50);
       end
    endtask
@@ -252,8 +252,8 @@ module tb_worker #
    integer i;
    
    initial begin
+      initTest;
       for (i = 0; i < 10; i = i + 1) begin
-         initTest;
          distributeTest;
          switchTest;
          setColorTest;

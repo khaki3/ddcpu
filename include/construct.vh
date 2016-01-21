@@ -15,13 +15,22 @@ function [WORKER_RESULT_WIDTH-1:0] make_worker_result;
    input [2:0]  dest_option;
    input [15:0] dest_addr;
    input [15:0] color;
-   input [31:0] result;
-   make_worker_result = {dest_option, dest_addr, color, result};
+   input [31:0] data;
+   make_worker_result = {dest_option, dest_addr, color, data};
 endfunction
 
 function [WORKER_RESULT_WIDTH-1:0] make_worker_result_direct;
    input [32:0] dest;
    input [15:0] color;
-   input [31:0] result;
-   make_worker_result_direct = {dest[18:16], dest[15:0], color, result};
+   input [31:0] data;
+   make_worker_result_direct = {dest[18:16], dest[15:0], color, data};
+endfunction
+
+function [PACKET_REQUEST_WIDTH-1:0] make_packet_request;
+   input [2:0]  dest_option;
+   input [15:0] dest_addr;
+   input [15:0] color;
+   input [31:0] arg1;
+   input [31:0] arg2;
+   make_packet_request = {dest_option, dest_addr, color, arg1, arg2};
 endfunction

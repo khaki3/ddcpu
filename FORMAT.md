@@ -65,6 +65,14 @@ quote from emulator code...
   dest-option
   dest-addr
   color
-  result ; 32bits
+  data ; 32bits
+  )
+
+(define-record-type packet-request %make-packet-request #t
+  dest-option
+  dest-addr
+  color
+  arg1
+  arg2
   )
 ```
