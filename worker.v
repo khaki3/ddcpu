@@ -49,31 +49,31 @@ module worker #
    wire insn_plus       = (packet_opcode == INSN_PLUS);
 
    localparam
-     S_READ             = 2'b00,
-     S_WRITE1           = 2'b01,
-     S_WRITE2           = 2'b10;
+     S_RECEIVE = 2'b00,
+     S_SEND1   = 2'b01,
+     S_SEND2   = 2'b10;
 
    // STATE
    always @ (posedge CLK) begin
       if (RST)
-        STATE <= S_READ;
+        STATE <= S_RECEIVE;
       else
         case (STATE)
-          S_READ:
+          S_RECEIVE:
             if (PC_VALID && PC_READY)
-              STATE <= S_WRITE1;
+              STATE <= S_SEND1;
 
-          S_WRITE1:
+          S_SEND1:
             if (WR_VALID && WR_READY) begin
                if (insn_distribute || insn_sync)
-                 STATE <= S_WRITE2;
+                 STATE <= S_SEND2;
                else
-                 STATE <= S_READ;
+                 STATE <= S_RECEIVE;
             end
 
-          S_WRITE2:
+          S_SEND2:
             if (WR_VALID && WR_READY)
-              STATE <= S_READ;
+              STATE <= S_RECEIVE;
         endcase
    end
 
@@ -81,10 +81,10 @@ module worker #
    always @ (posedge CLK) begin
       if (RST)
         WR_DATA <= 0;
-      else if (STATE == S_WRITE1 || STATE == S_WRITE2) begin
+      else if (STATE == S_SEND1 || STATE == S_SEND2) begin
          case (packet_opcode)
            INSN_DISTRIBUTE:
-              if (STATE == S_WRITE1)
+              if (STATE == S_SEND1)
                 WR_DATA <= make_worker_result_direct(packet_data2, packet_color, packet_data1);
               else
                 WR_DATA <= make_worker_result_direct(packet_data3, packet_color, packet_data1);
@@ -99,7 +99,7 @@ module worker #
              WR_DATA <= make_worker_result(packet_dest_option, packet_dest_addr, packet_data2[15:0], packet_data1);
 
            INSN_SYNC:
-             if (STATE == S_WRITE1)
+             if (STATE == S_SEND1)
                WR_DATA <= make_worker_result_direct(packet_data3, packet_color, packet_data1);
              else
                WR_DATA <= make_worker_result_direct(packet_data4, packet_color, packet_data2);
@@ -114,7 +114,7 @@ module worker #
    always @ (posedge CLK) begin
       if (RST)
         WR_VALID <= 0;
-      else if (STATE == S_WRITE1 || STATE == S_WRITE2)
+      else if (STATE == S_SEND1 || STATE == S_SEND2)
         if (WR_VALID && WR_READY)
           WR_VALID <= 0;
         else
@@ -125,7 +125,7 @@ module worker #
    always @ (posedge CLK) begin
       if (RST)
         PC_READY <= 0;
-      else if (STATE == S_READ) begin
+      else if (STATE == S_RECEIVE) begin
          if (PC_VALID && PC_READY)
            PC_READY <= 0;
          else

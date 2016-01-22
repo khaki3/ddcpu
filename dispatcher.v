@@ -54,15 +54,15 @@ module dispatcher #
    `include "include/extract_wr_data.vh"
      
    localparam
-     S_READ     = 2'b00,
-     S_WR_WRITE = 2'b01,
-     S_PR_WRITE = 2'b10;
+     S_RECEIVE = 2'b00,
+     S_WR_SEND = 2'b01,
+     S_PR_SEND = 2'b10;
 
    // SEND_PR_VALID
    always @ (posedge CLK) begin
       if (RST)
         SEND_PR_VALID <= 0;
-      else if (STATE == S_PR_WRITE)
+      else if (STATE == S_PR_SEND)
         if (SEND_PR_VALID && SEND_PR_READY)
           SEND_PR_VALID <= 0;
         else
@@ -79,7 +79,7 @@ module dispatcher #
    always @ (posedge CLK) begin
       if (RST)
         SEND_WR_VALID <= 0;
-      else if (STATE == S_WR_WRITE)
+      else if (STATE == S_WR_SEND)
         if (SEND_WR_VALID && SEND_WR_READY)
           SEND_WR_VALID <= 0;
         else
@@ -103,7 +103,7 @@ module dispatcher #
    always @ (posedge CLK) begin
       if (RST)
         RECEIVE_WR_READY <= 0;
-      else if (STATE == S_READ) begin
+      else if (STATE == S_RECEIVE) begin
          if (RECEIVE_WR_VALID && RECEIVE_WR_READY)
            RECEIVE_WR_READY <= 0;
          else
@@ -122,26 +122,26 @@ module dispatcher #
    // STATE
    always @ (posedge CLK) begin
       if (RST)
-        STATE <= S_READ;
+        STATE <= S_RECEIVE;
       else
         case (STATE)
-          S_READ:
+          S_RECEIVE:
             if (RECEIVE_WR_VALID && RECEIVE_WR_READY)
               if (receive_wr_data_dest_option == DEST_OPTION_EXEC ||
                   receive_wr_data_dest_option == DEST_OPTION_ONE)
-                STATE <= S_PR_WRITE;
+                STATE <= S_PR_SEND;
 
               else if (receive_wr_data_dest_option == DEST_OPTION_LEFT ||
                        receive_wr_data_dest_option == DEST_OPTION_RIGHT)
-                STATE <= S_WR_WRITE;
+                STATE <= S_WR_SEND;
 
-          S_PR_WRITE:
+          S_PR_SEND:
             if (SEND_PR_VALID && SEND_PR_READY)
-              STATE <= S_READ;
+              STATE <= S_RECEIVE;
 
-          S_WR_WRITE:
+          S_WR_SEND:
             if (SEND_WR_VALID && SEND_WR_READY)
-              STATE <= S_READ;
+              STATE <= S_RECEIVE;
         endcase
    end
 
