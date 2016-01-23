@@ -5,7 +5,7 @@ module axi_config #
   (
    output                          AWID,
    output [7:0]                    AWLEN,
-   output [2:0]                    AWBURST,
+   output [1:0]                    AWBURST,
    output [2:0]                    AWSIZE,
    output [1:0]                    AWLOCK,
    output [3:0]                    AWCACHE,
@@ -30,7 +30,7 @@ module axi_config #
    );
 
    assign ARID    = 1'b0;
-   assign AWLEN   = 3'b0;   // currently, 1 - 1 = 0
+   assign ARLEN   = 8'b0;   // currently, 1 - 1 = 0
    assign ARBURST = 2'b01;
    assign ARSIZE  = 3'b010;
    assign ARLOCK  = 1'b0;
@@ -40,7 +40,7 @@ module axi_config #
    assign ARUSER  = 1'b0;
 
    assign AWID    = 1'b0;
-   assign AWLEN   = 3'b0;   // currently, 1 - 1 = 0
+   assign AWLEN   = 8'b0;   // currently, 1 - 1 = 0
    assign AWBURST = 2'b01;
    assign AWSIZE  = 3'b010; // 4 byte => 32bit
    assign AWLOCK  = 2'b00;

@@ -82,19 +82,20 @@ module cache
       if (RST)
         STATE <= S_RECEIVE;
       else
-         case (RECEIVE_ADDR_VALID && RECEIVE_READY)
+         case (STATE)
            S_RECEIVE:
-             if (RECEIVE_DATA_VALID)
-               STATE <= S_AXI_AR;
-             else
-               STATE <= S_AXI_AW;
+             if (RECEIVE_ADDR_VALID && RECEIVE_READY)
+               if (RECEIVE_DATA_VALID)
+                 STATE <= S_AXI_AW;
+               else
+                 STATE <= S_AXI_AR;
 
            S_AXI_AR:
              if (ARVALID && ARREADY)
                STATE <= S_AXI_R;
 
            S_AXI_R:
-             if (RVALID)
+             if (RVALID && RREADY)
                STATE <= S_SEND;
 
            S_AXI_AW:
@@ -152,7 +153,7 @@ module cache
         AWVALID <= 0;
       else if (AWVALID && !AWREADY)
         AWVALID <= 1;
-      else if (AWVALID && ARREADY)
+      else if (AWVALID && AWREADY)
         AWVALID <= 0;
       else if (STATE == S_AXI_AW)
         AWVALID <= 1;
@@ -198,7 +199,7 @@ module cache
 
    // SEND_DATA
    always @ (posedge CLK) begin
-      if (RVALID)
+      if (RVALID && RREADY)
         SEND_DATA <= RDATA;
       else if (WVALID && WREADY)
         SEND_DATA <= WDATA;

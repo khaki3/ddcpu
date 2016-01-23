@@ -3,7 +3,7 @@
 module tb_cache;
 
    localparam integer C_AXI_DATA_WIDTH = 32;
-   localparam integer C_OFFSET_WIDTH = 24;
+   localparam integer C_OFFSET_WIDTH = 29;
    localparam integer STEP = 8;
 
    // System Signals
@@ -89,7 +89,7 @@ module tb_cache;
       .ARESETN        (ARESETN),
 
       .S_AXI_AWID     (M_DRW_AWID),
-      .S_AXI_AWADDR   (M_DRW_AWADDR),
+      .S_AXI_AWADDR   ({3'b001, M_DRW_AWADDR[28:0]}), // 0x20000000~0x3FFFFFFF
       .S_AXI_AWLEN    (M_DRW_AWLEN),
       .S_AXI_AWSIZE   (M_DRW_AWSIZE),
       .S_AXI_AWBURST  (M_DRW_AWBURST),
@@ -115,7 +115,7 @@ module tb_cache;
       .S_AXI_BREADY   (M_DRW_BREADY),
       
       .S_AXI_ARID     (M_DRW_ARID),
-      .S_AXI_ARADDR   (M_DRW_ARADDR),
+      .S_AXI_ARADDR   ({3'b001, M_DRW_ARADDR[28:0]}), // 0x20000000~0x3FFFFFFF
       .S_AXI_ARLEN    (M_DRW_ARLEN),
       .S_AXI_ARSIZE   (M_DRW_ARSIZE),
       .S_AXI_ARBURST  (M_DRW_ARBURST),
@@ -139,7 +139,7 @@ module tb_cache;
      (
       .AWID    (M_DRW_AWID),
       .AWBURST (M_DRW_AWBURST),
-      .AWLEN   (M_AWLEN),
+      .AWLEN   (M_DRW_AWLEN),
       .AWSIZE  (M_DRW_AWSIZE),
       .AWLOCK  (M_DRW_AWLOCK),
       .AWCACHE (M_DRW_AWCACHE),
@@ -162,26 +162,124 @@ module tb_cache;
       .ARQOS   (M_DRW_ARQOS),
       .ARUSER  (M_DRW_ARUSER));
 
+   reg RECEIVE_ADDR_VALID;
+   reg [31:0] RECEIVE_ADDR;
+   reg        RECEIVE_DATA_VALID;
+   reg [31:0] RECEIVE_DATA;
+   wire       RECEIVE_READY;
+
+   wire        SEND_VALID;
+   wire [31:0] SEND_DATA;
+   reg         SEND_READY;
+
    cache cache
      (
       .CLK     (ACLK),
       .RST     (ARST),
 
+      .RECEIVE_ADDR_VALID (RECEIVE_ADDR_VALID),
+      .RECEIVE_ADDR       (RECEIVE_ADDR),
+      .RECEIVE_DATA_VALID (RECEIVE_DATA_VALID),
+      .RECEIVE_DATA       (RECEIVE_DATA),
+      .RECEIVE_READY      (RECEIVE_READY),
+
+      .SEND_VALID         (SEND_VALID),
+      .SEND_DATA          (SEND_DATA),
+      .SEND_READY         (SEND_READY),
+
       .ARADDR  (M_DRW_ARADDR),
       .ARVALID (M_DRW_ARVALID),
       .ARREADY (M_DRW_ARREADY),
 
-      .RVALID  (M_DRW_RDATA),
-      .RDATA   (M_DRW_RVALID),
+      .RVALID  (M_DRW_RVALID),
+      .RDATA   (M_DRW_RDATA),
       .RREADY  (M_DRW_RREADY),
 
-      .AWREADY (M_DRW_AWADDR),
-      .AWADDR  (M_DRW_AWVALID),
-      .AWVALID (M_DRW_AWREADY),
+      .AWREADY (M_DRW_AWREADY),
+      .AWADDR  (M_DRW_AWADDR),
+      .AWVALID (M_DRW_AWVALID),
 
       .WREADY  (M_DRW_WREADY),
       .WDATA   (M_DRW_WDATA),
       .WVALID  (M_DRW_WVALID),
       .WLAST   (M_DRW_WLAST));
+
+   task raiseError(input integer stage);
+      begin
+         $display("ERROR: %x", stage);
+         $stop;
+      end
+   endtask
+
+   task send;
+      begin
+         RECEIVE_ADDR_VALID = 1;
+         while (!(RECEIVE_ADDR_VALID && RECEIVE_READY))
+           #STEP;
+         #STEP;
+         RECEIVE_ADDR_VALID = 0;
+      end
+   endtask
+
+   task receive;
+      begin
+         SEND_READY = 1;
+         while (!(SEND_VALID && SEND_READY))
+           #STEP;
+         #STEP;
+         SEND_READY = 0;
+      end
+   endtask
+
+   task initTest;
+      begin
+         ARESETN = 1;
+
+         RECEIVE_ADDR_VALID = 1'b0;
+         RECEIVE_ADDR       = 32'b0;
+         RECEIVE_DATA_VALID = 1'b0;
+         RECEIVE_DATA       = 32'b0;
+
+         SEND_READY         = 1'b0;
+         
+         #STEP;
+         ARESETN = 0;
+         #(STEP*10);
+         ARESETN = 1;
+         #(STEP*100);
+      end
+   endtask
+
+   reg [31:0] data;
+   
+   task pokePeekTest;
+      begin
+         RECEIVE_ADDR = {$random};
+         data =         {$random};
+
+         RECEIVE_DATA_VALID = 1;
+         RECEIVE_DATA       = data;
+         send;
+         receive;
+
+         RECEIVE_DATA_VALID = 0;
+         send;
+         receive;
+
+         if (!(SEND_DATA === data))
+           raiseError('h10);
+      end
+   endtask
+
+   integer i;
+   
+   initial begin
+      initTest;
+      for (i = 0; i < 100; i = i + 1) begin
+         pokePeekTest;
+      end
+      $display("finish");
+      $stop;
+   end
 
 endmodule
