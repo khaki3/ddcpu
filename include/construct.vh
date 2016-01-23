@@ -1,6 +1,6 @@
 function [PACKET_WIDTH-1:0] make_packet;
-   input [2:0]  opmode;
-   input [10:0] opcode;
+   input [1:0]  opmode;
+   input [9:0]  opcode;
    input [31:0] data1;
    input [31:0] data2;
    input [31:0] data3;
@@ -8,7 +8,20 @@ function [PACKET_WIDTH-1:0] make_packet;
    input [2:0]  dest_option;
    input [15:0] dest_addr;
    input [15:0] color;
-   make_packet = {opmode, opcode, data1, data2, data3, data4, dest_option, dest_addr, color};
+   make_packet = {opmode, opcode, data1, data2, data3, data4,
+                  dest_option, dest_addr, color};
+endfunction
+
+function [PACKET_WIDTH-1:0] make_packet_from_request;
+   input [PACKET_WIDTH-1:0]         template_packet;
+   input [PACKET_REQUEST_WIDTH-1:0] packet_request;
+   make_packet_from_request
+     = {template_packet[174:163],
+        (packet_request[98:96] != DEST_OPTION_EXEC)
+        ? packet_request[63:32] : template_packet[162:131],
+        (packet_request[98:96] == DEST_OPTION_RIGHT)
+        ? packet_request[31:0] : template_packet[130:99],
+        template_packet[98:0]};
 endfunction
 
 function [WORKER_RESULT_WIDTH-1:0] make_worker_result;

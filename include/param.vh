@@ -52,6 +52,13 @@ parameter INSN_SYNC       = 10'h003,
 parameter INSN_PLUS       = 10'h100,
 
 ///
+/// opcode
+///
+parameter OPCODE_EI = 2'b00,
+parameter OPCODE_FN = 2'b01,
+parameter OPCODE_MA = 2'b10,
+
+///
 /// dest option
 ///
 parameter DEST_OPTION_EXEC  = 3'b000,
