@@ -65,6 +65,8 @@ module cache
    output reg        WLAST
    );
 
+   `include "include/macro.vh"
+
    localparam
      S_RECEIVE   = 3'b000,
      S_AXI_AR    = 3'b001,
@@ -176,26 +178,10 @@ module cache
    end
 
    // RECEIVE_READY
-   always @ (posedge CLK) begin
-      if (RST)
-        RECEIVE_READY <= 0;
-      else if (STATE == S_RECEIVE)
-         if (RECEIVE_ADDR_VALID && RECEIVE_READY)
-           RECEIVE_READY <= 0;
-         else
-           RECEIVE_READY <= 1;
-   end
+   `receiveAlways(posedge CLK, RST, STATE == S_RECEIVE, RECEIVE_ADDR_VALID, RECEIVE_READY)
 
    // SEND_VALID
-   always @ (posedge CLK) begin
-      if (RST)
-        SEND_VALID <= 0;
-      else if (STATE == S_SEND)
-        if (SEND_VALID && SEND_READY)
-          SEND_VALID <= 0;
-        else
-          SEND_VALID <= 1;
-   end
+   `sendAlways(posedge CLK, RST, STATE == S_SEND, SEND_VALID, SEND_READY)
 
    // SEND_DATA
    always @ (posedge CLK) begin

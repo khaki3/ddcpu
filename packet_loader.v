@@ -162,36 +162,12 @@ module packet_loader #
    end
 
    // RECEIVE_PR_READY
-   always @ (posedge CLK) begin
-      if (RST)
-        RECEIVE_PR_READY <= 0;
-      else if (STATE == S_RECEIVE)
-         if (RECEIVE_PR_VALID && RECEIVE_PR_READY)
-           RECEIVE_PR_READY <= 0;
-         else
-           RECEIVE_PR_READY <= 1;
-   end
+   `receiveAlways(posedge CLK, RST, STATE == S_RECEIVE, RECEIVE_PR_VALID, RECEIVE_PR_READY)
 
    // MEM_SEND_ADDR_VALID
-   always @ (posedge CLK) begin
-      if (RST)
-        MEM_SEND_ADDR_VALID <= 0;
-      else if (STATE == S_MEM_SEND)
-        if (MEM_SEND_ADDR_VALID && MEM_SEND_READY)
-          MEM_SEND_ADDR_VALID <= 0;
-        else
-          MEM_SEND_ADDR_VALID <= 1;
-   end
+   `sendAlways(posedge CLK, RST, STATE == S_MEM_SEND, MEM_SEND_ADDR_VALID, MEM_SEND_READY)
 
    // SEND_PC_VALID
-   always @ (posedge CLK) begin
-      if (RST)
-        SEND_PC_VALID <= 0;
-      else if (STATE == S_SEND)
-        if (SEND_PC_VALID && SEND_PC_READY)
-          SEND_PC_VALID <= 0;
-        else
-          SEND_PC_VALID <= 1;
-   end
+   `sendAlways(posedge CLK, RST, STATE == S_SEND, SEND_PC_VALID, SEND_PC_READY)
 
 endmodule

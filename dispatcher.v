@@ -50,6 +50,7 @@ module dispatcher #
    reg [WORKER_RESULT_WIDTH-1:0] current_wr_data;
    wire [2:0] receive_wr_data_dest_option = RECEIVE_WR_DATA[WORKER_RESULT_WIDTH-1:WORKER_RESULT_WIDTH-1-2];
 
+   `include "include/macro.vh"
    `include "include/construct.vh"
    `include "include/extract_wr_data.vh"
      
@@ -58,33 +59,16 @@ module dispatcher #
      S_WR_SEND = 2'b01,
      S_PR_SEND = 2'b10;
 
-   // SEND_PR_VALID
-   always @ (posedge CLK) begin
-      if (RST)
-        SEND_PR_VALID <= 0;
-      else if (STATE == S_PR_SEND)
-        if (SEND_PR_VALID && SEND_PR_READY)
-          SEND_PR_VALID <= 0;
-        else
-          SEND_PR_VALID <= 1;
-   end
-
    assign SEND_PR_DATA = make_packet_request(worker_result_dest_option,
                                              worker_result_dest_addr,
                                              worker_result_color,
                                              worker_result_data,
                                              32'b0);
-
+   // SEND_PR_VALID
+   `sendAlways(posedge CLK, RST, STATE == S_PR_SEND, SEND_PR_VALID, SEND_PR_READY)
+   
    // SEND_WR_VALID
-   always @ (posedge CLK) begin
-      if (RST)
-        SEND_WR_VALID <= 0;
-      else if (STATE == S_WR_SEND)
-        if (SEND_WR_VALID && SEND_WR_READY)
-          SEND_WR_VALID <= 0;
-        else
-          SEND_WR_VALID <= 1;
-   end
+   `sendAlways(posedge CLK, RST, STATE == S_WR_SEND, SEND_WR_VALID, SEND_WR_READY)
 
    assign SEND_WR_DATA = current_wr_data;
 
@@ -100,16 +84,7 @@ module dispatcher #
    end
 
    // RECEIVE_WR_READY
-   always @ (posedge CLK) begin
-      if (RST)
-        RECEIVE_WR_READY <= 0;
-      else if (STATE == S_RECEIVE) begin
-         if (RECEIVE_WR_VALID && RECEIVE_WR_READY)
-           RECEIVE_WR_READY <= 0;
-         else
-           RECEIVE_WR_READY <= 1;
-      end
-   end
+   `receiveAlways(posedge CLK, RST, STATE == S_RECEIVE, RECEIVE_WR_VALID, RECEIVE_WR_READY)
 
    // current_wr_data
    always @ (posedge CLK) begin

@@ -83,27 +83,27 @@ module tb_packet_loader #
    endtask
 
    task sendPR;
-      `sendTask(RECEIVE_PR_VALID, RECEIVE_PR_READY)
+      `sendTask(CYCLE, RECEIVE_PR_VALID, RECEIVE_PR_READY)
    endtask
 
    task receiveMEM;
-      `receiveTask(MEM_SEND_ADDR_VALID, MEM_SEND_READY)
+      `receiveTask(CYCLE, MEM_SEND_ADDR_VALID, MEM_SEND_READY)
    endtask
 
    task sendMEM;
-      `sendTask(MEM_RECEIVE_VALID, MEM_RECEIVE_READY)
+      `sendTask(CYCLE, MEM_RECEIVE_VALID, MEM_RECEIVE_READY)
    endtask
 
    task receivePcAsQU;
-      `receiveTask(SEND_PC_TO_QU_VALID, SEND_PC_TO_QU_READY)
+      `receiveTask(CYCLE, SEND_PC_TO_QU_VALID, SEND_PC_TO_QU_READY)
    endtask
 
    task receivePcAsFE;
-      `receiveTask(SEND_PC_TO_FE_VALID, SEND_PC_TO_FE_READY)
+      `receiveTask(CYCLE, SEND_PC_TO_FE_VALID, SEND_PC_TO_FE_READY)
    endtask
 
    task receivePcAsMA;
-      `receiveTask(SEND_PC_TO_MA_VALID, SEND_PC_TO_MA_READY)
+      `receiveTask(CYCLE, SEND_PC_TO_MA_VALID, SEND_PC_TO_MA_READY)
    endtask
    
    task initTest;

@@ -67,15 +67,15 @@ module tb_dispatcher #
    endtask
 
    task sendWR;
-      `sendTask(RECEIVE_WR_VALID, RECEIVE_WR_READY)
+      `sendTask(CYCLE, RECEIVE_WR_VALID, RECEIVE_WR_READY)
    endtask
 
    task receiveWR;
-      `receiveTask(SEND_WR_VALID, SEND_WR_READY)
+      `receiveTask(CYCLE, SEND_WR_VALID, SEND_WR_READY)
    endtask
 
    task receivePR;
-      `receiveTask(SEND_PR_VALID, SEND_PR_READY)
+      `receiveTask(CYCLE, SEND_PR_VALID, SEND_PR_READY)
    endtask
 
    reg [15:0] dest_addr, color;

@@ -60,11 +60,11 @@ module tb_worker #
    reg [31:0] data1, data2, data3, data4;
 
    task sendPC;
-      `sendTask(RECEIVE_PC_VALID, RECEIVE_PC_READY)
+      `sendTask(CYCLE, RECEIVE_PC_VALID, RECEIVE_PC_READY)
    endtask
 
    task receiveWR;
-      `receiveTask(SEND_WR_VALID, SEND_WR_READY)
+      `receiveTask(CYCLE, SEND_WR_VALID, SEND_WR_READY)
    endtask
 
    task distributeTest;
