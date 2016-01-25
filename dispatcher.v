@@ -52,7 +52,7 @@ module dispatcher #
 
    `include "include/macro.vh"
    `include "include/construct.vh"
-   `include "include/extract_wr_data.vh"
+   `extract_worker_result(current_wr_data)
      
    localparam
      S_RECEIVE = 2'b00,

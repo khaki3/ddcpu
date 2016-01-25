@@ -68,8 +68,8 @@ module packet_loader #
    reg [PACKET_WIDTH-1:0]         current_pc_data;
 
    `include "include/construct.vh"
-   `include "include/extract_pr_data.vh"
-   `include "include/extract_pc_data.vh"
+   `extract_packet_request(current_pr_data)
+   `extract_packet(current_pc_data)
 
    reg [2:0] mem_count; // 0 ~ 5
    assign MEM_SEND_ADDR       = OPADDR + packet_request_dest_addr + mem_count * 4; // (32/8) = 4

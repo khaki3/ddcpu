@@ -49,8 +49,9 @@ module worker #
    reg [1:0]   STATE;
    reg [PACKET_WIDTH-1:0] current_pc_data;
 
+   `include "include/macro.vh"
    `include "include/construct.vh"
-   `include "include/extract_pc_data.vh"
+   `extract_packet(current_pc_data)
 
    wire ma_peek = (packet_opcode == MA_PEEK);
    wire ma_poke = (packet_opcode == MA_POKE);
@@ -91,15 +92,7 @@ module worker #
    end
 
    // MEM_SEND_ADDR_VALID
-   always @ (posedge CLK) begin
-      if (RST)
-        MEM_SEND_ADDR_VALID <= 0;
-      else if (STATE == S_MEM_SEND)
-        if (MEM_SEND_ADDR_VALID && MEM_SEND_READY)
-          MEM_SEND_ADDR_VALID <= 0;
-        else
-          MEM_SEND_ADDR_VALID <= 1;
-   end
+   `sendAlways(posedge CLK, RST, STATE == S_MEM_SEND, MEM_SEND_ADDR_VALID, MEM_SEND_READY)
 
    // SEND_WR_DATA
    always @ (posedge CLK) begin
@@ -113,27 +106,10 @@ module worker #
    end
 
    // SEND_WR_VALID
-   always @ (posedge CLK) begin
-      if (RST)
-        SEND_WR_VALID <= 0;
-      else if (STATE == S_SEND)
-        if (SEND_WR_VALID && SEND_WR_READY)
-          SEND_WR_VALID <= 0;
-        else
-          SEND_WR_VALID <= 1;
-   end
+   `sendAlways(posedge CLK, RST, STATE == S_SEND, SEND_WR_VALID, SEND_WR_READY)
 
    // RECEIVE_PC_READY
-   always @ (posedge CLK) begin
-      if (RST)
-        RECEIVE_PC_READY <= 0;
-      else if (STATE == S_RECEIVE) begin
-         if (RECEIVE_PC_VALID && RECEIVE_PC_READY)
-           RECEIVE_PC_READY <= 0;
-         else
-           RECEIVE_PC_READY <= 1;
-      end
-   end
+   `receiveAlways(posedge CLK, RST, STATE == S_RECEIVE, RECEIVE_PC_VALID, RECEIVE_PC_READY)
 
    // current_pc_data
    always @ (posedge CLK) begin

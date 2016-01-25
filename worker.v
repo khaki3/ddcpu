@@ -41,7 +41,7 @@ module worker #
    
    `include "include/macro.vh"
    `include "include/construct.vh"
-   `include "include/extract_pc_data.vh"
+   `extract_packet(current_pc_data)
 
    wire insn_distribute = (packet_opcode == INSN_DISTRIBUTE);
    wire insn_switch     = (packet_opcode == INSN_SWITCH);
