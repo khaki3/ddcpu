@@ -51,6 +51,10 @@ parameter INSN_SET_COLOR  = 10'h002,
 parameter INSN_SYNC       = 10'h003,
 parameter INSN_PLUS       = 10'h100,
 
+// MA
+parameter MA_PEEK = 10'h000,
+parameter MA_POKE = 10'h001,
+
 ///
 /// opcode
 ///
