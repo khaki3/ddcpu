@@ -71,7 +71,8 @@ module packet_loader #
    `include "include/extract_pr_data.vh"
    `include "include/extract_pc_data.vh"
 
-   assign MEM_SEND_ADDR       = OPADDR + packet_request_dest_addr;
+   reg [2:0] mem_count; // 0 ~ 5
+   assign MEM_SEND_ADDR       = OPADDR + packet_request_dest_addr + mem_count * 4; // (32/8) = 4
    assign MEM_SEND_DATA_VALID = 1'b0;
    assign MEM_SEND_DATA       = 32'b0;
    assign MEM_RECEIVE_READY   = 1'b1;
@@ -118,7 +119,10 @@ module packet_loader #
 
           S_MEM_RECEIVE:
             if (MEM_RECEIVE_VALID && MEM_RECEIVE_READY)
-              STATE <= S_SEND;
+              if (mem_count == 3'd5)
+                STATE <= S_SEND;
+              else
+                STATE <= S_MEM_SEND;
 
           S_SEND:
             if (SEND_PC_VALID && SEND_PC_READY)
@@ -126,10 +130,21 @@ module packet_loader #
         endcase
    end
 
+   // mem_count
+   always @ (posedge CLK) begin
+      if (RST)
+        mem_count <= 3'd0;
+      else if (MEM_RECEIVE_VALID && MEM_RECEIVE_READY)
+        if (mem_count == 3'd5)
+          mem_count <= 3'd0;
+        else
+          mem_count <= mem_count + 1;
+   end
+
    // current_pr_data
    always @ (posedge CLK) begin
       if (RST)
-        current_pr_data <= 32'b0;
+        current_pr_data <= 0;
       else if (RECEIVE_PR_VALID && RECEIVE_PR_READY)
         current_pr_data <= RECEIVE_PR_DATA;
    end
@@ -137,9 +152,13 @@ module packet_loader #
    // current_pc_data
    always @ (posedge CLK) begin
       if (RST)
-        current_pc_data <= 32'b0;
+        current_pc_data <= 0;
       else if (MEM_RECEIVE_VALID && MEM_RECEIVE_READY)
-        current_pc_data <= MEM_RECEIVE_DATA;
+        if (mem_count == 3'd5)
+          current_pc_data[14:0] <= MEM_RECEIVE_DATA[14:0];
+        else
+          current_pc_data[PACKET_WIDTH - 1 - mem_count * 32 -: 32]
+            <= MEM_RECEIVE_DATA;
    end
 
    // RECEIVE_PR_READY
