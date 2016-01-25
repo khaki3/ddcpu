@@ -49,7 +49,7 @@
    wire [31:0] packet_request_arg2        = packet_request[31:0];
 
 `define extract_worker_result(worker_result) \
-   wire [2:0]  worker_result_dest_option = current_wr_data[66:64];\
-   wire [15:0] worker_result_dest_addr   = current_wr_data[63:48];\
-   wire [15:0] worker_result_color       = current_wr_data[47:32];\
-   wire [31:0] worker_result_data        = current_wr_data[31:0];
+   wire [2:0]  worker_result_dest_option = worker_result[66:64];\
+   wire [15:0] worker_result_dest_addr   = worker_result[63:48];\
+   wire [15:0] worker_result_color       = worker_result[47:32];\
+   wire [31:0] worker_result_data        = worker_result[31:0];
