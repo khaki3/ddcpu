@@ -18,6 +18,7 @@ module tb_worker #
    reg  SEND_WR_READY;
    wire [WORKER_RESULT_WIDTH-1:0] SEND_WR_DATA;
 
+   `include "include/macro.vh"
    `include "include/construct.vh"
 
    worker w0 (.CLK(CLK), .RST(RST),
@@ -58,24 +59,12 @@ module tb_worker #
    reg [15:0] color, old_color, new_color;
    reg [31:0] data1, data2, data3, data4;
 
-   task send;
-      begin
-         RECEIVE_PC_VALID = 1;
-         while (!(RECEIVE_PC_VALID && RECEIVE_PC_READY))
-           #CYCLE;
-         #CYCLE;
-         RECEIVE_PC_VALID = 0;
-      end
+   task sendPC;
+      `sendTask(RECEIVE_PC_VALID, RECEIVE_PC_READY)
    endtask
 
-   task receive;
-      begin
-         SEND_WR_READY = 1;
-         while (!(SEND_WR_VALID && SEND_WR_READY))
-           #CYCLE;
-         #CYCLE;
-         SEND_WR_READY = 0;
-      end
+   task receiveWR;
+      `receiveTask(SEND_WR_VALID, SEND_WR_READY)
    endtask
 
    task distributeTest;
@@ -99,8 +88,8 @@ module tb_worker #
                                        3'b0,
                                        16'b0,
                                        color);
-         send;
-         receive;
+         sendPC;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option1,
                                                    dest_addr1,
@@ -108,7 +97,7 @@ module tb_worker #
                                                    data1)))
            raiseError('h10);
 
-         receive;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option2,
                                                    dest_addr2,
@@ -142,8 +131,8 @@ module tb_worker #
                                        16'b0,
                                        color);
 
-         send;
-         receive;
+         sendPC;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option1,
                                                    dest_addr1,
@@ -163,8 +152,8 @@ module tb_worker #
                                        16'b0,
                                        color);
 
-         send;
-         receive;
+         sendPC;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option2,
                                                    dest_addr2,
@@ -194,8 +183,8 @@ module tb_worker #
                                        dest_addr1,
                                        old_color);
 
-         send;
-         receive;
+         sendPC;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option1,
                                                    dest_addr1,
@@ -227,8 +216,8 @@ module tb_worker #
                                        3'b0,
                                        16'b0,
                                        color);
-         send;
-         receive;
+         sendPC;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option1,
                                                    dest_addr1,
@@ -236,7 +225,7 @@ module tb_worker #
                                                    data1)))
            raiseError('h40);
 
-         receive;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option2,
                                                    dest_addr2,
@@ -266,8 +255,8 @@ module tb_worker #
                                        dest_addr1,
                                        color);
 
-         send;
-         receive;
+         sendPC;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(dest_option1,
                                                    dest_addr1,

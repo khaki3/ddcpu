@@ -211,24 +211,14 @@ module tb_cache;
       end
    endtask
 
-   task send;
-      begin
-         RECEIVE_ADDR_VALID = 1;
-         while (!(RECEIVE_ADDR_VALID && RECEIVE_READY))
-           #STEP;
-         #STEP;
-         RECEIVE_ADDR_VALID = 0;
-      end
+   `include "include/macro.vh"
+
+   task sendMEM;
+      `sendTask(RECEIVE_ADDR_VALID, RECEIVE_READY);
    endtask
 
-   task receive;
-      begin
-         SEND_READY = 1;
-         while (!(SEND_VALID && SEND_READY))
-           #STEP;
-         #STEP;
-         SEND_READY = 0;
-      end
+   task receiveMEM;
+      `receiveTask(SEND_VALID, SEND_READY);
    endtask
 
    task initTest;
@@ -259,12 +249,12 @@ module tb_cache;
 
          RECEIVE_DATA_VALID = 1;
          RECEIVE_DATA       = data;
-         send;
-         receive;
+         sendMEM;
+         receiveMEM;
 
          RECEIVE_DATA_VALID = 0;
-         send;
-         receive;
+         sendMEM;
+         receiveMEM;
 
          if (!(SEND_DATA === data))
            raiseError('h10);

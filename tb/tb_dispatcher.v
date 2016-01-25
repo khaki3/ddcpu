@@ -6,6 +6,7 @@ module tb_dispatcher #
    );
 
    `include "include/construct.vh"
+   `include "include/macro.vh"
    
    parameter CYCLE = 100;
 
@@ -65,34 +66,16 @@ module tb_dispatcher #
       end
    endtask
 
-   task send;
-      begin
-         RECEIVE_WR_VALID = 1;
-         while (!(RECEIVE_WR_VALID && RECEIVE_WR_READY))
-           #CYCLE;
-         #CYCLE;
-         RECEIVE_WR_VALID = 0;
-      end
+   task sendWR;
+      `sendTask(RECEIVE_WR_VALID, RECEIVE_WR_READY)
    endtask
 
-   task wr_receive;
-      begin
-         SEND_WR_READY = 1;
-         while (!(SEND_WR_VALID && SEND_WR_READY))
-           #CYCLE;
-         #CYCLE;
-         SEND_WR_READY = 0;
-      end
+   task receiveWR;
+      `receiveTask(SEND_WR_VALID, SEND_WR_READY)
    endtask
 
-   task pr_receive;
-      begin
-         SEND_PR_READY = 1;
-         while (!(SEND_PR_VALID && SEND_PR_READY))
-           #CYCLE;
-         #CYCLE;
-         SEND_PR_READY = 0;
-      end
+   task receivePR;
+      `receiveTask(SEND_PR_VALID, SEND_PR_READY)
    endtask
 
    reg [15:0] dest_addr, color;
@@ -106,8 +89,8 @@ module tb_dispatcher #
          
          RECEIVE_WR_DATA = make_worker_result(DEST_OPTION_EXEC, dest_addr, color, data);
 
-         send;
-         pr_receive;
+         sendWR;
+         receivePR;
 
          if (!(SEND_PR_DATA === make_packet_request(DEST_OPTION_EXEC, dest_addr, color, data, 32'h0)))
            raiseError('h10);
@@ -122,8 +105,8 @@ module tb_dispatcher #
          
          RECEIVE_WR_DATA = make_worker_result(DEST_OPTION_ONE, dest_addr, color, data);
 
-         send;
-         pr_receive;
+         sendWR;
+         receivePR;
 
          if (!(SEND_PR_DATA === make_packet_request(DEST_OPTION_ONE, dest_addr, color, data, 32'h0)))
            raiseError('h20);
@@ -138,8 +121,8 @@ module tb_dispatcher #
          
          RECEIVE_WR_DATA = make_worker_result(DEST_OPTION_LEFT, dest_addr, color, data);
 
-         send;
-         wr_receive;
+         sendWR;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(DEST_OPTION_LEFT, dest_addr, color, data)))
            raiseError('h30);
@@ -154,8 +137,8 @@ module tb_dispatcher #
          
          RECEIVE_WR_DATA = make_worker_result(DEST_OPTION_RIGHT, dest_addr, color, data);
 
-         send;
-         wr_receive;
+         sendWR;
+         receiveWR;
 
          if (!(SEND_WR_DATA === make_worker_result(DEST_OPTION_RIGHT, dest_addr, color, data)))
            raiseError('h30);
@@ -169,7 +152,7 @@ module tb_dispatcher #
          data      = 32'h3333_4444;
 
          RECEIVE_WR_DATA = make_worker_result(DEST_OPTION_NOP, dest_addr, color, data);
-         send;
+         sendWR;
       end
    endtask
 
@@ -180,7 +163,7 @@ module tb_dispatcher #
          data      = 32'h7777_8888;
 
          RECEIVE_WR_DATA = make_worker_result(DEST_OPTION_END, dest_addr, color, data);
-         send;
+         sendWR;
 
          if (!EXECUTION_END)
            raiseError('h50);

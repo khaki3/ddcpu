@@ -5,6 +5,8 @@ module tb_packet_loader #
    `include "include/param.vh"
    );
 
+   `include "include/macro.vh"
+
    parameter CYCLE = 100;
 
    reg  CLK;
@@ -80,39 +82,28 @@ module tb_packet_loader #
       end
    endtask
 
-   `define handshake(A, B) \
-      begin\
-        B = 1;\
-        while (!(A && B)) #CYCLE;\
-          #CYCLE;\
-        B = 0;\
-      end
-
-   `define send(VALID, READY)   `handshake(READY, VALID)
-   `define receive(VALID,READY) `handshake(VALID, READY)
-
    task sendPR;
-      `send(RECEIVE_PR_VALID, RECEIVE_PR_READY)
+      `sendTask(RECEIVE_PR_VALID, RECEIVE_PR_READY)
    endtask
 
    task receiveMEM;
-      `receive(MEM_SEND_ADDR_VALID, MEM_SEND_READY)
+      `receiveTask(MEM_SEND_ADDR_VALID, MEM_SEND_READY)
    endtask
 
    task sendMEM;
-      `send(MEM_RECEIVE_VALID, MEM_RECEIVE_READY)
+      `sendTask(MEM_RECEIVE_VALID, MEM_RECEIVE_READY)
    endtask
 
    task receivePcAsQU;
-      `receive(SEND_PC_TO_QU_VALID, SEND_PC_TO_QU_READY)
+      `receiveTask(SEND_PC_TO_QU_VALID, SEND_PC_TO_QU_READY)
    endtask
 
    task receivePcAsFE;
-      `receive(SEND_PC_TO_FE_VALID, SEND_PC_TO_FE_READY)
+      `receiveTask(SEND_PC_TO_FE_VALID, SEND_PC_TO_FE_READY)
    endtask
 
    task receivePcAsMA;
-      `receive(SEND_PC_TO_MA_VALID, SEND_PC_TO_MA_READY)
+      `receiveTask(SEND_PC_TO_MA_VALID, SEND_PC_TO_MA_READY)
    endtask
    
    task initTest;
@@ -218,13 +209,10 @@ module tb_packet_loader #
 
    initial begin
       initTest;
-      for (i = 0; i < 10; i = i + 1) begin
-         for (oc = OPCODE_EI; oc <= OPCODE_MA; oc = oc + 1) begin
-            for (dopt = DEST_OPTION_EXEC; dopt <= DEST_OPTION_RIGHT; dopt = dopt + 1) begin
-               loadTest(oc, dopt);
-            end
-         end
-      end
+      for (i = 0; i < 10; i = i + 1)
+        for (oc = OPCODE_EI; oc <= OPCODE_MA; oc = oc + 1)
+          for (dopt = DEST_OPTION_EXEC; dopt <= DEST_OPTION_RIGHT; dopt = dopt + 1)
+            loadTest(oc, dopt);
       $display("finish");
       $stop;
    end
