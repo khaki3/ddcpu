@@ -141,20 +141,20 @@ module tb_packet_loader #
       input [1:0] opmode;
       input [2:0] dest_option;
       begin
-         dest_addr = {$random};
+         dest_addr = $random;
          
          packet_request = make_packet_request(dest_option,
                                               dest_addr,
-                                              {$random},
-                                              {$random},
-                                              {$random});
+                                              $random,
+                                              $random,
+                                              $random);
 
          template_packet = make_packet(opmode,
-                                       {$random},
-                                       {$random}, {$random}, {$random}, {$random},
-                                       {$random},
-                                       {$random},
-                                       {$random});
+                                       $random,
+                                       $random, $random, $random, $random,
+                                       $random,
+                                       $random,
+                                       $random);
 
          RECEIVE_PR_DATA = packet_request;
          sendPR;

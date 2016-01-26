@@ -244,8 +244,8 @@ module tb_cache;
    
    task pokePeekTest;
       begin
-         RECEIVE_ADDR = {$random};
-         data =         {$random};
+         RECEIVE_ADDR = $random;
+         data         = $random;
 
          RECEIVE_DATA_VALID = 1;
          RECEIVE_DATA       = data;
