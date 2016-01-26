@@ -79,7 +79,7 @@ module tb_worker #
          data2 = {dest_option1, dest_addr1};
          data3 = {dest_option2, dest_addr2};
 
-         RECEIVE_PC_DATA = make_packet(2'b00,
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
                                        INSN_DISTRIBUTE,
                                        data1,
                                        data2,
@@ -121,7 +121,7 @@ module tb_worker #
          data3 = {dest_option1, dest_addr1};
          data4 = {dest_option2, dest_addr2};
 
-         RECEIVE_PC_DATA = make_packet(2'b00,
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
                                        INSN_SWITCH,
                                        data1,
                                        data2,
@@ -142,7 +142,7 @@ module tb_worker #
 
          data2 = 32'h0; // false
 
-         RECEIVE_PC_DATA = make_packet(2'b00,
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
                                        INSN_SWITCH,
                                        data1,
                                        data2,
@@ -173,7 +173,7 @@ module tb_worker #
          data1 = 32'habcd_1234;
          data2 = new_color;
 
-         RECEIVE_PC_DATA = make_packet(2'b00,
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
                                        INSN_SET_COLOR,
                                        data1,
                                        data2,
@@ -207,7 +207,7 @@ module tb_worker #
          data3 = {dest_option1, dest_addr1};
          data4 = {dest_option2, dest_addr2};
 
-         RECEIVE_PC_DATA = make_packet(2'b00,
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
                                        INSN_SYNC,
                                        data1,
                                        data2,
@@ -245,7 +245,7 @@ module tb_worker #
          data1 = 32'hdead_0000;
          data2 = 32'h0000_beef;
 
-         RECEIVE_PC_DATA = make_packet(2'b00,
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
                                        INSN_PLUS,
                                        data1,
                                        data2,
