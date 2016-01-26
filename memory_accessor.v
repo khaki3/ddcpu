@@ -19,7 +19,7 @@
  
 */
 
-module worker #
+module memory_accessor #
   (
    `include "include/param.vh"
    )
