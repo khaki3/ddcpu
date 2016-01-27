@@ -47,3 +47,12 @@ function [PACKET_REQUEST_WIDTH-1:0] make_packet_request;
    input [31:0] arg2;
    make_packet_request = {dest_option, dest_addr, color, arg1, arg2};
 endfunction
+
+function [FUNCTION_WIDTH-1:0] make_function;
+   input [18:0] coloring;
+   input [18:0] returning;
+   input [18:0] arg1;
+   input [18:0] arg2;
+   input [18:0] exec;
+   make_function = {coloring, returning, arg1, arg2, exec};
+endfunction

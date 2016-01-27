@@ -38,9 +38,8 @@ parameter integer PACKET_REQUEST_WIDTH = 99,
  arg1      = 19
  arg2      = 19
  exec      = 19
- sum => 95 -> 96 ; (* 32 3)
 */
-parameter integer FUNCTION_WIDTH = 96,
+parameter integer FUNCTION_WIDTH = 95,
 
 /// 
 /// instructions number
