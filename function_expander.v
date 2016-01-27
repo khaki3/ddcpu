@@ -48,6 +48,17 @@ module function_expander #
     input                             SEND_PR_READY
    );
 
+   localparam
+     S_IN_RECEIVE     = 2'b00,
+     S_IN_MEM_SEND    = 2'b01,
+     S_IN_MEM_RECEIVE = 2'b10,
+     S_IN_WAIT        = 2'b11;
+
+   localparam
+     S_OUT_RECEIVE    = 2'b00,
+     S_OUT_WAIT       = 2'b01,
+     S_OUT_SEND       = 2'b10;
+
    reg [1:0] STATE_IN;
    reg [1:0] STATE_OUT;
 
@@ -58,6 +69,7 @@ module function_expander #
    `include "include/construct.vh"
    `extract_packet(current_pc_data)
    `extract_function(current_fn_data)
+   `extract_packet_request(SEND_PR_DATA)
 
    reg [1:0] mem_count; // 0 ~ 2
    reg [2:0] send_count; // 0 ~ 4
@@ -69,7 +81,9 @@ module function_expander #
    assign MEM_SEND_DATA_VALID = 1'b0;
    assign MEM_RECEIVE_READY   = 1'b1;
 
-   
+   wire pr_valid = (packet_request_dest_option != DEST_OPTION_NOP);
+   wire sended   = ((STATE_OUT == S_OUT_SEND && !pr_valid) ||
+                    (SEND_PR_VALID && SEND_PR_READY));
 
    wire [PACKET_REQUEST_WIDTH-1:0]
      coloring_pr  = make_packet_request(function_coloring[18:16], // Mostly this has DEST_OPTION_LEFT
@@ -108,17 +122,6 @@ module function_expander #
                           (send_count == 3'd3) ? arg2_pr      :
                           (send_count == 3'd4) ? exec_pr      : 32'b0);
 
-   localparam
-     S_IN_RECEIVE     = 2'b00,
-     S_IN_MEM_SEND    = 2'b01,
-     S_IN_MEM_RECEIVE = 2'b10,
-     S_IN_WAIT        = 2'b11;
-
-   localparam
-     S_OUT_RECEIVE    = 2'b00,
-     S_OUT_WAIT       = 2'b01,
-     S_OUT_SEND       = 2'b10;
-
    // new_color
    always @ (posedge CLK) begin
       if (RST)
@@ -137,7 +140,7 @@ module function_expander #
           mem_count <= mem_count + 1;
       end
 
-      else if (SEND_PR_VALID && SEND_PR_READY && send_count == 3'd4)
+      else if (sended && send_count == 3'd4)
         mem_count <= 2'b0;
    end
 
@@ -145,7 +148,7 @@ module function_expander #
    always @ (posedge CLK) begin
       if (RST)
         send_count <= 2'b0;
-      else if (SEND_PR_VALID && SEND_PR_READY)
+      else if (sended)
         if (send_count == 3'd4)
           send_count <= 2'b0;
         else
@@ -174,7 +177,7 @@ module function_expander #
                 STATE_IN <= S_IN_MEM_SEND;
 
           S_IN_WAIT:
-            if (SEND_PR_VALID && SEND_PR_READY && send_count == 3'd4)
+            if (sended && send_count == 3'd4)
               STATE_IN <= S_IN_RECEIVE;
         endcase
    end
@@ -194,7 +197,7 @@ module function_expander #
               STATE_OUT <= S_OUT_SEND;
 
           S_OUT_SEND:
-            if (SEND_PR_VALID && SEND_PR_READY)
+            if (sended)
               if (send_count == 3'd4)
                 STATE_OUT <= S_OUT_RECEIVE;
 
@@ -219,7 +222,7 @@ module function_expander #
    end
 
    // SEND_PR_VALID
-   `sendAlways(posedge CLK, RST, STATE_OUT == S_OUT_SEND, SEND_PR_VALID, SEND_PR_READY)
+   `sendAlways(posedge CLK, RST, STATE_OUT == S_OUT_SEND && pr_valid, SEND_PR_VALID, SEND_PR_READY)
 
    // RECEIVE_PC_READY
    `receiveAlways(posedge CLK, RST, STATE_IN == S_IN_RECEIVE, RECEIVE_PC_VALID, RECEIVE_PC_READY)
