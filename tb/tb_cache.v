@@ -214,11 +214,11 @@ module tb_cache;
    `include "include/macro.vh"
 
    task sendMEM;
-      `sendTask(STEP, RECEIVE_ADDR_VALID, RECEIVE_READY);
+      `sendTask(STEP, RECEIVE_ADDR_VALID, RECEIVE_READY)
    endtask
 
    task receiveMEM;
-      `receiveTask(STEP, SEND_VALID, SEND_READY);
+      `receiveTask(STEP, SEND_VALID, SEND_READY)
    endtask
 
    task initTest;
