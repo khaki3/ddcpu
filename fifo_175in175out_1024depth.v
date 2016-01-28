@@ -37,34 +37,26 @@
 `timescale 1ns/1ps
 
 module fifo_175in175out_1024depth(
+  clk,
   rst,
-  wr_clk,
-  rd_clk,
   din,
   wr_en,
   rd_en,
   dout,
   full,
-  overflow,
   empty,
-  valid,
-  underflow,
-  wr_data_count
+  valid
 );
 
+input clk;
 input rst;
-input wr_clk;
-input rd_clk;
 input [174 : 0] din;
 input wr_en;
 input rd_en;
 output [174 : 0] dout;
 output full;
-output overflow;
 output empty;
 output valid;
-output underflow;
-output [9 : 0] wr_data_count;
 
 // synthesis translate_off
 
@@ -92,7 +84,7 @@ output [9 : 0] wr_data_count;
     .C_AXIS_TSTRB_WIDTH(4),
     .C_AXIS_TUSER_WIDTH(4),
     .C_AXIS_TYPE(0),
-    .C_COMMON_CLOCK(0),
+    .C_COMMON_CLOCK(1),
     .C_COUNT_TYPE(0),
     .C_DATA_COUNT_WIDTH(10),
     .C_DEFAULT_VALUE("BlankString"),
@@ -144,7 +136,7 @@ output [9 : 0] wr_data_count;
     .C_HAS_INT_CLK(0),
     .C_HAS_MASTER_CE(0),
     .C_HAS_MEMINIT_FILE(0),
-    .C_HAS_OVERFLOW(1),
+    .C_HAS_OVERFLOW(0),
     .C_HAS_PROG_FLAGS_AXIS(0),
     .C_HAS_PROG_FLAGS_RACH(0),
     .C_HAS_PROG_FLAGS_RDCH(0),
@@ -156,12 +148,12 @@ output [9 : 0] wr_data_count;
     .C_HAS_RST(1),
     .C_HAS_SLAVE_CE(0),
     .C_HAS_SRST(0),
-    .C_HAS_UNDERFLOW(1),
+    .C_HAS_UNDERFLOW(0),
     .C_HAS_VALID(1),
     .C_HAS_WR_ACK(0),
-    .C_HAS_WR_DATA_COUNT(1),
+    .C_HAS_WR_DATA_COUNT(0),
     .C_HAS_WR_RST(0),
-    .C_IMPLEMENTATION_TYPE(2),
+    .C_IMPLEMENTATION_TYPE(0),
     .C_IMPLEMENTATION_TYPE_AXIS(1),
     .C_IMPLEMENTATION_TYPE_RACH(1),
     .C_IMPLEMENTATION_TYPE_RDCH(1),
@@ -193,14 +185,14 @@ output [9 : 0] wr_data_count;
     .C_PROG_EMPTY_TYPE_WACH(0),
     .C_PROG_EMPTY_TYPE_WDCH(0),
     .C_PROG_EMPTY_TYPE_WRCH(0),
-    .C_PROG_FULL_THRESH_ASSERT_VAL(1021),
+    .C_PROG_FULL_THRESH_ASSERT_VAL(1022),
     .C_PROG_FULL_THRESH_ASSERT_VAL_AXIS(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_RACH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_RDCH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_WACH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_WDCH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_WRCH(1023),
-    .C_PROG_FULL_THRESH_NEGATE_VAL(1020),
+    .C_PROG_FULL_THRESH_NEGATE_VAL(1021),
     .C_PROG_FULL_TYPE(0),
     .C_PROG_FULL_TYPE_AXIS(0),
     .C_PROG_FULL_TYPE_RACH(0),
@@ -260,24 +252,21 @@ output [9 : 0] wr_data_count;
     .C_WRCH_TYPE(0)
   )
   inst (
+    .CLK(clk),
     .RST(rst),
-    .WR_CLK(wr_clk),
-    .RD_CLK(rd_clk),
     .DIN(din),
     .WR_EN(wr_en),
     .RD_EN(rd_en),
     .DOUT(dout),
     .FULL(full),
-    .OVERFLOW(overflow),
     .EMPTY(empty),
     .VALID(valid),
-    .UNDERFLOW(underflow),
-    .WR_DATA_COUNT(wr_data_count),
     .BACKUP(),
     .BACKUP_MARKER(),
-    .CLK(),
     .SRST(),
+    .WR_CLK(),
     .WR_RST(),
+    .RD_CLK(),
     .RD_RST(),
     .PROG_EMPTY_THRESH(),
     .PROG_EMPTY_THRESH_ASSERT(),
@@ -290,9 +279,12 @@ output [9 : 0] wr_data_count;
     .INJECTSBITERR(),
     .ALMOST_FULL(),
     .WR_ACK(),
+    .OVERFLOW(),
     .ALMOST_EMPTY(),
+    .UNDERFLOW(),
     .DATA_COUNT(),
     .RD_DATA_COUNT(),
+    .WR_DATA_COUNT(),
     .PROG_FULL(),
     .PROG_EMPTY(),
     .SBITERR(),

@@ -63,7 +63,7 @@ module tb_queue #
 
    task randomPC;
       output [PACKET_WIDTH-1:0] pc;
-      pc = {$random, $random, $random, $random, $random};
+      pc = {$random, $random, $random, $random, $random, $random};
    endtask
 
    reg [PACKET_WIDTH-1:0] pc [1023:0];
@@ -75,15 +75,15 @@ module tb_queue #
          ds = {$random} % 1024;
 
          for (di = 0; di <= ds; di = di + 1) begin
-            pc[di] = randomPC;
+            randomPC(pc[di]);
             RECEIVE_PC_DATA = pc[di];
 
             sendPC;
          end
 
          for (di = 0; di <= ds; di = di + 1) begin
-            receiveWR;
-            if (!(SEND_WR_DATA === pc[di]))
+            receivePC;
+            if (!(SEND_PC_DATA === pc[di]))
               raiseError('h10);
          end
       end
@@ -94,7 +94,7 @@ module tb_queue #
    initial begin
       initTest;
       for (i = 0; i < 100; i = i + 1)
-        queueTest1;
+        queueTest;
       $display("finish");
       $stop;
    end

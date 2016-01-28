@@ -41,8 +41,6 @@ module queue #
    reg  rd_en;
    wire [PACKET_WIDTH-1:0] dout;
    wire empty, valid, full;
-   wire overflow, underflow;
-   wire [11:0] cmdcount;
 
    // RECEIVE_PC_READY
    always @ (posedge CLK) begin
@@ -64,11 +62,8 @@ module queue #
       .rd_en         (rd_en),
       .dout          (dout),
       .full          (full),
-      .overflow      (overflow),
       .empty         (empty),
-      .valid         (valid),
-      .underflow     (underflow),
-      .data_count    (cmdcount)
+      .valid         (valid)
       );
 
    reg STATE;
