@@ -22,12 +22,12 @@ module tb_worker #
    `include "include/construct.vh"
 
    worker w0 (.CLK(CLK), .RST(RST),
-              .RECEIVE_PC_VALID(RECEIVE_PC_VALID),
-              .RECEIVE_PC_DATA(RECEIVE_PC_DATA),
-              .RECEIVE_PC_READY(RECEIVE_PC_READY),
-              .SEND_WR_VALID(SEND_WR_VALID),
-              .SEND_WR_DATA(SEND_WR_DATA),
-              .SEND_WR_READY(SEND_WR_READY));
+              .RECEIVE_PC_VALID (RECEIVE_PC_VALID),
+              .RECEIVE_PC_DATA  (RECEIVE_PC_DATA),
+              .RECEIVE_PC_READY (RECEIVE_PC_READY),
+              .SEND_WR_VALID (SEND_WR_VALID),
+              .SEND_WR_DATA  (SEND_WR_DATA),
+              .SEND_WR_READY (SEND_WR_READY));
 
    always #(CYCLE/2)
      CLK = ~CLK;
