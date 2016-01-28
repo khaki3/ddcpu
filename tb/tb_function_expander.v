@@ -112,7 +112,6 @@ module tb_function_expander #
    reg [15:0] new_color;
 
    reg [1:0]  mem_count;
-   reg [2:0]  send_count;
    reg [18:0] fn_coloring, fn_returning, fn_arg1, fn_arg2, fn_exec;
 
    function isNOP;

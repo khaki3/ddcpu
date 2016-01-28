@@ -82,7 +82,8 @@ module function_expander #
    assign MEM_RECEIVE_READY   = 1'b1;
 
    wire pr_valid = (packet_request_dest_option != DEST_OPTION_NOP);
-   wire sended   = ((STATE_OUT == S_OUT_SEND && !pr_valid) + // In here, '|' doesn't work correctly..
+   wire sent     = ((STATE_OUT == S_OUT_SEND && !pr_valid)
+                    + // In here, '|' works correctly with ModelSim, but doesn't with iverilog.
                     (SEND_PR_VALID && SEND_PR_READY));
 
    wire [PACKET_REQUEST_WIDTH-1:0]
@@ -141,7 +142,7 @@ module function_expander #
           mem_count <= mem_count + 1;
       end
 
-      else if (sended && send_count == 3'd4)
+      else if (sent && send_count == 3'd4)
         mem_count <= 2'b0;
    end
 
@@ -149,7 +150,7 @@ module function_expander #
    always @ (posedge CLK) begin
       if (RST)
         send_count <= 3'b0;
-      else if (sended)
+      else if (sent)
         if (send_count == 3'd4)
           send_count <= 3'b0;
         else
@@ -178,7 +179,7 @@ module function_expander #
                 STATE_IN <= S_IN_MEM_SEND;
 
           S_IN_WAIT:
-            if (sended && send_count == 3'd4)
+            if (sent && send_count == 3'd4)
               STATE_IN <= S_IN_RECEIVE;
         endcase
    end
@@ -198,7 +199,7 @@ module function_expander #
               STATE_OUT <= S_OUT_SEND;
 
           S_OUT_SEND:
-            if (sended)
+            if (sent)
               if (send_count == 3'd4)
                 STATE_OUT <= S_OUT_RECEIVE;
 
