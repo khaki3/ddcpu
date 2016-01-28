@@ -86,13 +86,13 @@ module function_expander #
                     (SEND_PR_VALID && SEND_PR_READY));
 
    wire [PACKET_REQUEST_WIDTH-1:0]
-     coloring_pr  = make_packet_request(function_coloring[18:16], // Mostly this has DEST_OPTION_LEFT
+     coloring_pr  = make_packet_request(function_coloring[18:16], // Mostly this has DEST_OPTION_RIGHT
                                         function_coloring[15:0],  // Mostly this addr contains an INSN_SET_COLOR operation
                                         new_color,
                                         packet_color,
                                         32'b0),
 
-     returning_pr = make_packet_request(function_returning[18:16], // DEST_OPTION_LEFT
+     returning_pr = make_packet_request(function_returning[18:16], // DEST_OPTION_RIGHT
                                         function_returning[15:0],  // INSN_DISTRIBUTE
                                         packet_color,
                                         {packet_dest_option, packet_dest_addr},
@@ -147,10 +147,10 @@ module function_expander #
    // send_count
    always @ (posedge CLK) begin
       if (RST)
-        send_count <= 2'b0;
+        send_count <= 3'b0;
       else if (sended)
         if (send_count == 3'd4)
-          send_count <= 2'b0;
+          send_count <= 3'b0;
         else
           send_count <= send_count + 1;
    end
