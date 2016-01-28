@@ -5,12 +5,23 @@
    begin\
      b = 1;\
      while (!(a && b)) #cycle;\
-       #cycle;\
+     #cycle;\
+     b = 0;\
+   end
+
+`define handshakeTask2(cycle, a, b, src, dst) \
+   begin\
+     b = 1;\
+     while (!(a && b)) #cycle;\
+     dst = src;\
+     #cycle;\
      b = 0;\
    end
 
 `define sendTask(cycle, valid, ready)    `handshakeTask(cycle, ready, valid)
 `define receiveTask(cycle, valid, ready) `handshakeTask(cycle, valid, ready)
+`define sendTask2(cycle, valid, ready, src, dst)    `handshakeTask2(cycle, ready, valid, src, dst)
+`define receiveTask2(cycle, valid, ready, src, dst) `handshakeTask2(cycle, valid, ready, src, dst)
 
 `define handshakeAlways(sen, rst, cond, a, b) \
    always @ (sen)\
@@ -55,8 +66,8 @@
    wire [31:0] worker_result_data        = worker_result[31:0];
 
 `define extract_function(fn) \
-   wire [18:0] function_coloring  = fn[19 * 4 - 1 -: 19];\
-   wire [18:0] function_returning = fn[19 * 3 - 1 -: 19];\
+   wire [18:0] function_coloring  = fn[19 * 5 - 1 -: 19];\
+   wire [18:0] function_returning = fn[19 * 4 - 1 -: 19];\
    wire [18:0] function_arg1      = fn[19 * 3 - 1 -: 19];\
    wire [18:0] function_arg2      = fn[19 * 2 - 1 -: 19];\
    wire [18:0] function_exec      = fn[19 * 1 - 1 -: 19];

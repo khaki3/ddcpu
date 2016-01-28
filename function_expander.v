@@ -82,10 +82,11 @@ module function_expander #
    assign MEM_RECEIVE_READY   = 1'b1;
 
    wire pr_valid = (packet_request_dest_option != DEST_OPTION_NOP);
-   wire sended   = ((STATE_OUT == S_OUT_SEND && !pr_valid) ||
+   wire sended   = ((STATE_OUT == S_OUT_SEND && !pr_valid) + // In here, '|' doesn't work correctly..
                     (SEND_PR_VALID && SEND_PR_READY));
 
    wire [PACKET_REQUEST_WIDTH-1:0]
+
      coloring_pr  = make_packet_request(function_coloring[18:16], // Mostly this has DEST_OPTION_RIGHT
                                         function_coloring[15:0],  // Mostly this addr contains an INSN_SET_COLOR operation
                                         new_color,
@@ -100,19 +101,19 @@ module function_expander #
 
      arg1_pr      = make_packet_request(function_arg1[18:16], // DEST_OPTION_ONE
                                         function_arg1[15:0],
-                                        packet_color,
+                                        new_color,
                                         packet_data1,
                                         32'b0),
 
      arg2_pr      = make_packet_request(function_arg2[18:16], // DEST_OPTION_ONE
                                         function_arg2[15:0],
-                                        packet_color,
+                                        new_color,
                                         packet_data2,
                                         32'b0),
 
      exec_pr      = make_packet_request(function_exec[18:16], // DEST_OPTION_EXEC
                                         function_exec[15:0],
-                                        packet_color,
+                                        new_color,
                                         32'b0,
                                         32'b0);
    
@@ -193,7 +194,7 @@ module function_expander #
               STATE_OUT <= S_OUT_WAIT;
 
           S_OUT_WAIT:
-            if (mem_count > send_count)
+            if (mem_count == 2'd2 || mem_count > send_count)
               STATE_OUT <= S_OUT_SEND;
 
           S_OUT_SEND:
@@ -218,7 +219,7 @@ module function_expander #
           current_fn_data[30:0] <= MEM_RECEIVE_DATA[30:0];
         else
           current_fn_data[FUNCTION_WIDTH - 1 - mem_count * 32 -: 32]
-            <= MEM_RECEIVE_DATA[30:0];
+            <= MEM_RECEIVE_DATA;
    end
 
    // SEND_PR_VALID

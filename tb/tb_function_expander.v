@@ -96,8 +96,10 @@ module tb_function_expander #
       `sendTask(CYCLE, MEM_RECEIVE_VALID, MEM_RECEIVE_READY)
    endtask
 
+   reg [PACKET_REQUEST_WIDTH-1:0] current_pr_data;
+
    task receivePR;
-      `receiveTask(CYCLE, SEND_PR_VALID, SEND_PR_READY)
+      `receiveTask2(CYCLE, SEND_PR_VALID, SEND_PR_READY, SEND_PR_DATA, current_pr_data)
    endtask
 
    reg [9:0]  pc_opcode;
@@ -118,7 +120,7 @@ module tb_function_expander #
       isNOP = (dest[18:16] === DEST_OPTION_NOP);
    endfunction
 
-   task feTest;
+   task feSend;
       begin
          FNADDR = $random;
 
@@ -158,54 +160,72 @@ module tb_function_expander #
 
             sendMEM;
          end
+      end
+   endtask
 
+   task feReceive;
+      begin
          // coloring
          receivePR;
-         new_color = f0.new_color;         
-         if (!(SEND_PR_DATA === make_packet_request(fn_coloring[18:16], fn_coloring[15:0],
-                                                    new_color,
-                                                    pc_color,
-                                                    32'b0)))
+         new_color = f0.new_color;
+         if (!(current_pr_data === make_packet_request(fn_coloring[18:16], fn_coloring[15:0],
+                                                       new_color,
+                                                       pc_color,
+                                                       32'b0)))
            raiseError({8'h11, 4'h0});
 
          // returning
          receivePR;
-         if (!(SEND_PR_DATA === make_packet_request(fn_returning[18:16], fn_returning[15:0],
-                                                    pc_color,
-                                                    {pc_dest_option, pc_dest_addr},
-                                                    32'b0)))
+         if (!(current_pr_data === make_packet_request(fn_returning[18:16], fn_returning[15:0],
+                                                       pc_color,
+                                                       {pc_dest_option, pc_dest_addr},
+                                                       32'b0)))
            raiseError({8'h11, 4'h1});
 
          // arg1
          if (!isNOP(fn_arg1)) begin
             receivePR;
-            if (!(SEND_PR_DATA === make_packet_request(fn_arg1[18:16], fn_arg1[15:0],
-                                                       new_color,
-                                                       pc_data1,
-                                                       32'b0)))
+            if (!(current_pr_data === make_packet_request(fn_arg1[18:16], fn_arg1[15:0],
+                                                          new_color,
+                                                          pc_data1,
+                                                          32'b0)))
               raiseError({8'h11, 4'h2});
          end
 
          // arg2
          if (!isNOP(fn_arg2)) begin
             receivePR;
-            if (!(SEND_PR_DATA === make_packet_request(fn_arg2[18:16], fn_arg2[15:0],
-                                                       new_color,
-                                                       pc_data2,
-                                                       32'b0)))
+            if (!(current_pr_data === make_packet_request(fn_arg2[18:16], fn_arg2[15:0],
+                                                          new_color,
+                                                          pc_data2,
+                                                          32'b0)))
               raiseError({8'h11, 4'h3});
          end
 
          // exec
          if (!isNOP(fn_exec)) begin
             receivePR;
-            if (!(SEND_PR_DATA === make_packet_request(fn_exec[18:16], fn_exec[15:0],
-                                                       new_color,
-                                                       32'b0,
-                                                       32'b0)))
+            if (!(current_pr_data === make_packet_request(fn_exec[18:16], fn_exec[15:0],
+                                                          new_color,
+                                                          32'b0,
+                                                          32'b0)))
               raiseError({8'h11, 4'h4});
          end
       end
+   endtask
+
+   task feTest1;
+      begin
+         feSend;
+         feReceive;
+      end
+   endtask
+
+   task feTest2;
+      fork
+         feSend;
+         feReceive;
+      join
    endtask
 
    integer i;
@@ -213,7 +233,8 @@ module tb_function_expander #
    initial begin
       initTest;
       for (i = 0; i < 100; i = i + 1) begin
-         feTest();
+         feTest1();
+         feTest2();
       end
       $display("finish");
       $stop;
