@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module tb_cache;
+module tb_memory_controller;
 
    localparam integer C_AXI_DATA_WIDTH = 32;
    localparam integer C_OFFSET_WIDTH = 29;
@@ -172,7 +172,7 @@ module tb_cache;
    wire [31:0] SEND_DATA;
    reg         SEND_READY;
 
-   cache cache
+   memory_controller memory_controller
      (
       .CLK     (ACLK),
       .RST     (ARST),

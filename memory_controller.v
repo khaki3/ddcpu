@@ -1,16 +1,16 @@
 /*
- memory cache (4way)
- --------------
+ memory controller
+ ------------------
 
-     |              / \
- [memory addr]       |
-     |             [data]
-     |               |
-    \ /             \ /
+       |           / \
+  [memory addr]     |
+       |          [data]
+       |            |
+      \ /          \ /
  
-    ======================
-    |       cache        |
-    ======================
+    =====================
+    | memory controller |
+    =====================
 
              / \
               |    AXI
@@ -19,18 +19,9 @@
       ----------------
            MEMORY
 
-
-  Algorithm: pseudo-LRU
-  ( http://people.cs.clemson.edu/~mark/464/p_lru.txt )
-
-  Size: 128 x 32bytes (line size) x 4 way
  */
 
-///
-/// !!Currently this implementation just works as a AXI-wrapper!!
-///
-
-module cache
+module memory_controller
   (
    input             CLK,
    input             RST,
