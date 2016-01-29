@@ -25,11 +25,6 @@
 
 module matching_memory #
   (
-   <SCM>
-     (define-constant MEM_SIZE 1024)
-     (print #"parameter integer MEM_SIZE = ~MEM_SIZE,")
-   </SCM>
-   parameter integer SEARCH_DELAY = 4,
    `include "include/param.vh"
    )
   (
@@ -44,6 +39,12 @@ module matching_memory #
    output [PACKET_REQUEST_WIDTH-1:0] SEND_PR_DATA,
    input                             SEND_PR_READY
    );
+
+   <SCM>
+     (define-constant MEM_SIZE 1024)
+     (print #"localparam MEM_SIZE = ~MEM_SIZE;")
+   </SCM>
+   localparam integer SEARCH_DELAY = 4;
 
    reg [WORKER_RESULT_WIDTH-1:0] current_wr_data;
 
