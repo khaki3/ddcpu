@@ -4,9 +4,10 @@
 
 (use file.util)
 
-(define (sten-eval str)
+(define (sten-eval string)
   (with-output-to-string
-    (^[] (eval (read-from-string str)
+    (^[] (eval (read-from-string
+                (string-append "(begin " string ")"))
                (current-module)))))
 
 (define (sten string)
@@ -31,4 +32,6 @@
 
   (let ([in  (~ args 1)]
         [out (~ args 2)])
-    (save out (sten (file->string in)))))
+    (save out (sten (file->string in))))
+
+  (sys-exit 0))

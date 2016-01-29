@@ -48,6 +48,22 @@ function [PACKET_REQUEST_WIDTH-1:0] make_packet_request;
    make_packet_request = {dest_option, dest_addr, color, arg1, arg2};
 endfunction
 
+function [PACKET_REQUEST_WIDTH-1:0] make_packet_request_merge;
+   input [WORKER_RESULT_WIDTH-1:0] wr1, wr2;
+   reg [WORKER_RESULT_WIDTH-1:0]   wrL, wrR;
+   begin
+      if (wr1[66:64] == DEST_OPTION_LEFT) begin
+         wrL = wr1;
+         wrR = wr2;
+      end
+      else begin
+         wrL = wr2;
+         wrR = wr1;
+      end
+      make_packet_request_merge = {wrL, wrR[31:0]};
+   end      
+endfunction
+
 function [FUNCTION_WIDTH-1:0] make_function;
    input [18:0] coloring;
    input [18:0] returning;
