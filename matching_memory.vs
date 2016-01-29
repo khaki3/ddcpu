@@ -54,9 +54,15 @@ module matching_memory #
    reg [MEM_SIZE-1:0] valid;
    reg [WORKER_RESULT_WIDTH-1:0] mem [MEM_SIZE-1:0];
    reg [MEM_SIZE-1:0] match;
-   wire               find;
-   wire [31:0]        match_index, invalid_index;
    reg [WORKER_RESULT_WIDTH-1:0] match_wr;
+
+   wire               find;
+   wire [31:0]        match_index,  invalid_index;
+   wire [32:0]        match_search, invalid_search;
+
+   assign find          = match_search[32];
+   assign match_index   = match_search[31:0];
+   assign invalid_index = invalid_search[31:0];
 
    reg [1:0] STATE;
 
@@ -136,42 +142,43 @@ module matching_memory #
       end
    endgenerate
 
+   function [32:0] select_search;
+      input [32:0] a, b;
+      select_search = a[32] ? a : b[32] ? b : 33'b0;
+   endfunction
+
    <SCM>
      ;;;
      ;;; pyramid-like assignment
      ;;;
 
-     ;; assign find        = (... ((match[0] | match[1]) | (match[2] | match[3])  ...
-     ;; assing match_index = (... (({32{match[0]}} && 0) | {32{match[1]} && 1}) | ...
-
      (use srfi-11)
 
-     (define (find-term i)
-       #"match[~i]")
+     (define (match-search-term1 i)
+       #"{match[~i], 32'd~i}")
 
-     (define (match-index-term i)
-       #"({32{match[~i]}} & ~i)")
+     (define (match-search-term2 a b)
+       #"select_search(~a, ~b)")
 
-     (define (invalid-index-term i)
-       #"({32{~~valid[~i]}} & ~i)")
+     (define (invalid-search-term1 i)
+       #"{~~valid[~i], 32'd~i}")
+
+     (define invalid-search-term2 match-search-term2)
 
      (define (split-in-half lst)
        (let ([len (length lst)])
          (split-at lst (floor (/ len 2)))))
 
-     (define (pyramid term-proc op lst)
-       (define (recur lst) (pyramid term-proc op lst))
+     (define (pyramid term1-proc term2-proc lst)
+       (define (recur lst) (pyramid term1-proc term2-proc lst))
        (if (= (length lst) 1)
-           (term-proc (~ lst 0))
+           (term1-proc (~ lst 0))
 
            (let-values ([(fst snd) (split-in-half lst)])
-             #"(~(recur fst) ~op ~(recur snd))")))
+             (term2-proc (recur fst) (recur snd)))))
 
-     (define-constant bitwise-or #\|)
-
-     (print #"assign find          = ~(pyramid find-term          bitwise-or (iota MEM_SIZE));")
-     (print #"assign match_index   = ~(pyramid match-index-term   bitwise-or (iota MEM_SIZE));")
-     (print #"assign invalid_index = ~(pyramid invalid-index-term bitwise-or (iota MEM_SIZE));")
+     (print #"assign match_search   = ~(pyramid match-search-term1   match-search-term2   (iota MEM_SIZE));")
+     (print #"assign invalid_search = ~(pyramid invalid-search-term1 invalid-search-term2 (iota MEM_SIZE));")
    </SCM>
 
    // match_wr
