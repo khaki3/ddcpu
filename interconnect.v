@@ -34,7 +34,7 @@ module interconnect #
    output reg [CONNECT_NUM-1:0]       RECEIVE_READY,
 
    output reg                         SEND_VALID,
-   output reg [DATA_WIDTH-1:0]        SEND_DATA,
+   output [DATA_WIDTH-1:0]            SEND_DATA,
    input                              SEND_READY
    );
 
@@ -59,9 +59,7 @@ module interconnect #
    end
 
    // SEND_DATA
-   always @* begin
-      SEND_DATA = RECEIVE_DATA[DATA_WIDTH * receive_index - 1 -: DATA_WIDTH];
-   end
+   assign SEND_DATA = RECEIVE_DATA[DATA_WIDTH * (receive_index + 1) - 1 -: DATA_WIDTH];
 
    genvar iG;
    generate

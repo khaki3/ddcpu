@@ -53,11 +53,11 @@ module tb_interconnect #
    endgenerate
 
    integer i_id;
-   
+
    // INTERCONNECT_DATA
    always @*
-     for (i_id = 1; i_id <= CONNECT_NUM; i_id = i_id + 1)
-       INTERCONNECT_DATA[DATA_WIDTH * i_id - 1 -: DATA_WIDTH] = SLAVE_RECEIVE_DATA[i_id];
+     for (i_id = 0; i_id < CONNECT_NUM; i_id = i_id + 1)
+       INTERCONNECT_DATA[DATA_WIDTH * (i_id + 1) - 1 -: DATA_WIDTH] = SLAVE_RECEIVE_DATA[i_id];
 
    interconnect # (
       .DATA_WIDTH(DATA_WIDTH),
