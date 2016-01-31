@@ -170,6 +170,17 @@ module tb_interconnect #
       join
    endtask
 
+   task icTestEntire3;
+      fork
+         icTestSend(0);
+         icTestSend(1);
+         begin
+            icTestReceive(1);
+            icTestReceive(0);
+         end
+      join
+   endtask
+
    integer i_main;
 
    initial begin
@@ -177,6 +188,7 @@ module tb_interconnect #
       for (i_main = 0; i_main < 100; i_main = i_main + 1) begin
          icTestEntire1;
          icTestEntire2;
+         icTestEntire3;
       end
       $display("finish");
       $stop;
