@@ -1,4 +1,4 @@
-function [PACKET_WIDTH-1:0] make_packet;
+function automatic [PACKET_WIDTH-1:0] make_packet;
    input [1:0]  opmode;
    input [9:0]  opcode;
    input [31:0] data1;
@@ -12,7 +12,7 @@ function [PACKET_WIDTH-1:0] make_packet;
                   dest_option, dest_addr, color};
 endfunction
 
-function [PACKET_WIDTH-1:0] make_packet_from_request;
+function automatic [PACKET_WIDTH-1:0] make_packet_from_request;
    input [PACKET_WIDTH-1:0]         template_packet;
    input [PACKET_REQUEST_WIDTH-1:0] packet_request;
    make_packet_from_request
@@ -24,7 +24,7 @@ function [PACKET_WIDTH-1:0] make_packet_from_request;
         template_packet[98:0]};
 endfunction
 
-function [WORKER_RESULT_WIDTH-1:0] make_worker_result;
+function automatic [WORKER_RESULT_WIDTH-1:0] make_worker_result;
    input [2:0]  dest_option;
    input [15:0] dest_addr;
    input [15:0] color;
@@ -32,14 +32,14 @@ function [WORKER_RESULT_WIDTH-1:0] make_worker_result;
    make_worker_result = {dest_option, dest_addr, color, data};
 endfunction
 
-function [WORKER_RESULT_WIDTH-1:0] make_worker_result_direct;
+function automatic [WORKER_RESULT_WIDTH-1:0] make_worker_result_direct;
    input [32:0] dest;
    input [15:0] color;
    input [31:0] data;
    make_worker_result_direct = {dest[18:16], dest[15:0], color, data};
 endfunction
 
-function [PACKET_REQUEST_WIDTH-1:0] make_packet_request;
+function automatic [PACKET_REQUEST_WIDTH-1:0] make_packet_request;
    input [2:0]  dest_option;
    input [15:0] dest_addr;
    input [15:0] color;
@@ -48,7 +48,7 @@ function [PACKET_REQUEST_WIDTH-1:0] make_packet_request;
    make_packet_request = {dest_option, dest_addr, color, arg1, arg2};
 endfunction
 
-function [PACKET_REQUEST_WIDTH-1:0] make_packet_request_merge;
+function automatic [PACKET_REQUEST_WIDTH-1:0] make_packet_request_merge;
    input [WORKER_RESULT_WIDTH-1:0] wr1, wr2;
    reg [WORKER_RESULT_WIDTH-1:0]   wrL, wrR;
    begin
@@ -64,7 +64,7 @@ function [PACKET_REQUEST_WIDTH-1:0] make_packet_request_merge;
    end      
 endfunction
 
-function [FUNCTION_WIDTH-1:0] make_function;
+function automatic [FUNCTION_WIDTH-1:0] make_function;
    input [18:0] coloring;
    input [18:0] returning;
    input [18:0] arg1;
