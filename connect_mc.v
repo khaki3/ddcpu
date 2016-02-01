@@ -20,7 +20,7 @@
            \ /
 
       ==============
-      | mc_connect |
+      | connect_mc |
       ==============
 
            / \
@@ -30,7 +30,7 @@
 
  */
 
-module mc_connect #
+module connect_mc #
   (
    parameter integer ADDR_WIDTH = 32,
    parameter integer DATA_WIDTH = 32,

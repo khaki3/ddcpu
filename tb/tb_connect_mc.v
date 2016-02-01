@@ -1,6 +1,6 @@
 `timescale 1ns/10ps
 
-module tb_mc_connect #
+module tb_connect_mc #
   (
    parameter integer ADDR_WIDTH = 32,
    parameter integer DATA_WIDTH = 32,
@@ -99,7 +99,7 @@ module tb_mc_connect #
       end
    endgenerate
 
-   mc_connect #
+   connect_mc #
      (
       .DATA_WIDTH(DATA_WIDTH),
       .CONNECT_NUM(CONNECT_NUM)

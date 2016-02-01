@@ -1,6 +1,6 @@
 /*
 
- interconnect (1 way)
+ connect_join (1 way)
  ------------------------
 
        |    |    |
@@ -14,7 +14,7 @@
            \ /
 
      ================
-     | interconnect |
+     | connect_join |
      ================
 
             |
@@ -23,7 +23,7 @@
 
  */
 
-module interconnect #
+module connect_join #
   (
    parameter integer DATA_WIDTH  = 32,
    parameter integer CONNECT_NUM = 3
