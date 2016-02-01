@@ -104,13 +104,13 @@ module mc_connect #
    end
 
    assign MASTER_SEND_ADDR       = SLAVE_RECEIVE_ADDR[ADDR_WIDTH * (selected_slave_index + 1) - 1 -: ADDR_WIDTH];
-   assign MASTER_SEND_DATA       = SLAVE_RECEIVE_ADDR[DATA_WIDTH * (selected_slave_index + 1) - 1 -: DATA_WIDTH];
+   assign MASTER_SEND_DATA       = SLAVE_RECEIVE_DATA[DATA_WIDTH * (selected_slave_index + 1) - 1 -: DATA_WIDTH];
    assign MASTER_SEND_DATA_VALID = SLAVE_RECEIVE_DATA_VALID[selected_slave_index];
    assign MASTER_RECEIVE_READY   = SLAVE_SEND_READY[selected_slave_index];
 
    genvar iG;
    generate
-      for (iG = 0; iG < CONNECT_NUM; iG = iG + 1) begin : slave_receive_ready_block
+      for (iG = 0; iG < CONNECT_NUM; iG = iG + 1) begin : slave_signal_block
          always @* begin
             if (SLAVE_RECEIVE_ADDR_VALID[iG] && selected_slave_index == iG && STATE == S_SLAVE_TO_MASTER)
               SLAVE_RECEIVE_READY[iG] = MASTER_SEND_READY;

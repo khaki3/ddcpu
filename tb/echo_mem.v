@@ -20,11 +20,11 @@ module echo_mem #
    input                       READ_SEND_READY,
 
    input                       WRITE_RECEIVE_VALID,
-   input [ADDR_WIDTH-1:0]      WRITE_RECEIVE_DATA,
+   input [DATA_WIDTH-1:0]      WRITE_RECEIVE_DATA,
    output                      WRITE_RECEIVE_READY,
    
    output                      WRITE_SEND_VALID,
-   output [ADDR_WIDTH-1:0]     WRITE_SEND_DATA,
+   output [DATA_WIDTH-1:0]     WRITE_SEND_DATA,
    input                       WRITE_SEND_READY
    );
 

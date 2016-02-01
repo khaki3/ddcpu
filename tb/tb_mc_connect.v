@@ -193,7 +193,7 @@ module tb_mc_connect #
       input [31:0] index;
       input        data_valid;
       begin
-         SLAVE_READ_RECEIVE_DATA_VALID = data_valid;
+         SLAVE_READ_RECEIVE_DATA_VALID[index] = data_valid;
          `sendTask(CYCLE, SLAVE_READ_RECEIVE_ADDR_VALID[index], SLAVE_READ_RECEIVE_READY[index])
       end
    endtask
@@ -216,10 +216,9 @@ module tb_mc_connect #
       input        data_valid;
       begin
          receiveMaster;
-
-         if (!(MASTER_READ_RECEIVE_DATA_VALID === data_valid  &&
-               MASTER_READ_RECEIVE_ADDR       === ADDR[index] &&
-               MASTER_READ_RECEIVE_DATA       === DATA[index]))
+         if (!(MASTER_READ_SEND_DATA_VALID === data_valid  &&
+               MASTER_READ_SEND_ADDR       === ADDR[index] &&
+               MASTER_READ_SEND_DATA       === DATA[index]))
            raiseError('h10);
 
          MASTER_WRITE_RECEIVE_DATA = DATA[index];
@@ -236,17 +235,20 @@ module tb_mc_connect #
    reg data_valid;
    
    task icTest;
-      fork
+      begin
          data_valid = $random;
-         sendSlave(2, data_valid);
-         sendSlave(1, data_valid);
-         sendSlave(0, data_valid);
-         begin
-            receiveTest(2, data_valid);
-            receiveTest(1, data_valid);
-            receiveTest(0, data_valid);
-         end
-      join
+
+         fork
+            sendSlave(2, data_valid);
+            sendSlave(1, data_valid);
+            sendSlave(0, data_valid);
+            begin
+               receiveTest(2, data_valid);
+               receiveTest(1, data_valid);
+               receiveTest(0, data_valid);
+            end
+         join
+      end
    endtask
 
    integer i_main;
