@@ -2,9 +2,10 @@
 
 module tb_connect_fork #
   (
-   parameter integer DATA_WIDTH  = PACKET_WIDTH,
-   parameter integer CONNECT_NUM = 3,
    `include "include/param.vh"
+   ,
+   parameter integer DATA_WIDTH  = PACKET_WIDTH,
+   parameter integer CONNECT_NUM = 3
    );
 
    parameter CYCLE = 100;
@@ -104,6 +105,7 @@ module tb_connect_fork #
          RST = 1;
 
          MASTER_RECEIVE_VALID = 0;
+         randomPC(MASTER_RECEIVE_DATA);
          for (i_init = 0; i_init < CONNECT_NUM; i_init = i_init + 1)
            SLAVE_SEND_READY[i_init] = 0;
 
@@ -138,7 +140,6 @@ module tb_connect_fork #
    task automatic icTestReceive;
       input [31:0] index;
       begin
-         randomPC(MASTER_RECEIVE_DATA);
          receivePC(index);
 
          if(!(MASTER_RECEIVE_DATA === SLAVE_SEND_DATA[index]))
@@ -147,46 +148,36 @@ module tb_connect_fork #
    endtask
 
    task icTestEntire1;
-      fork
-         begin
-            icTestSend;
-            icTestSend;
-            icTestSend;
-         end
-         begin
-            icTestReceive(2);
-            icTestReceive(1);
-            icTestReceive(0);
-         end
-      join
+      begin
+         icTestSend;
+         icTestSend;
+         icTestSend;
+
+         icTestReceive(2);
+         icTestReceive(1);
+         icTestReceive(0);
+      end
    endtask
 
    task icTestEntire2;
-      fork
-         begin
-            icTestSend;
-            icTestSend;
-            icTestSend;
-         end
-         begin
-            icTestReceive(2);
-            icTestReceive(1);
-            icTestReceive(0);
-         end
-      join
-   endtask
+      begin
+         icTestSend;
+         icTestSend;
+         icTestSend;
 
-   task icTestEntire3;
-      fork
-         begin
-            icTestSend;
-            icTestSend;
-         end
-         begin
-            icTestReceive(1);
-            icTestReceive(0);
-         end
-      join
+         icTestReceive(2);
+         icTestSend;
+
+         icTestReceive(1);
+         icTestSend;
+
+         icTestReceive(0);
+         icTestSend;
+
+         icTestReceive(2);
+         icTestReceive(1);
+         icTestReceive(0);
+      end
    endtask
 
    integer i_main;
@@ -196,7 +187,6 @@ module tb_connect_fork #
       for (i_main = 0; i_main < 100; i_main = i_main + 1) begin
          icTestEntire1;
          icTestEntire2;
-         icTestEntire3;
       end
       $display("finish");
       $stop;

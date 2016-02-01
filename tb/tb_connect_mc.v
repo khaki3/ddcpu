@@ -233,8 +233,21 @@ module tb_connect_mc #
    endtask
 
    reg data_valid;
+
+   integer i_test;
+
+   task icTest1;
+      for (i_test = 0; i_test < CONNECT_NUM; i_test = i_test + 1) begin
+         data_valid = $random;
+
+         fork
+            sendSlave(i_test, data_valid);
+            receiveTest(i_test, data_valid);
+         join
+      end
+   endtask
    
-   task icTest;
+   task icTest2;
       begin
          data_valid = $random;
 
@@ -255,8 +268,10 @@ module tb_connect_mc #
 
    initial begin
       initTest;
-      for (i_main = 0; i_main < 100; i_main = i_main + 1)
-        icTest;
+      for (i_main = 0; i_main < 100; i_main = i_main + 1) begin
+        icTest1;
+        icTest2;
+      end
       $display("finish");
       $stop;
    end

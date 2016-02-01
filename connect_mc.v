@@ -98,9 +98,10 @@ module connect_mc #
    // MASTER_SEND_ADDR_VALID
    always @* begin
       MASTER_SEND_ADDR_VALID = 1'b0;
-      for (i2 = 0; i2 < CONNECT_NUM; i2 = i2 + 1)
-        if (SLAVE_RECEIVE_ADDR_VALID[i2])
-          MASTER_SEND_ADDR_VALID = 1'b1;
+      if (STATE == S_SLAVE_TO_MASTER)
+        for (i2 = 0; i2 < CONNECT_NUM; i2 = i2 + 1)
+          if (SLAVE_RECEIVE_ADDR_VALID[i2])
+            MASTER_SEND_ADDR_VALID = 1'b1;
    end
 
    assign MASTER_SEND_ADDR       = SLAVE_RECEIVE_ADDR[ADDR_WIDTH * (selected_slave_index + 1) - 1 -: ADDR_WIDTH];

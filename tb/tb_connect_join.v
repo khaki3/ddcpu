@@ -2,9 +2,10 @@
 
 module tb_connect_join #
   (
-   parameter integer DATA_WIDTH  = PACKET_WIDTH,
-   parameter integer CONNECT_NUM = 3,
    `include "include/param.vh"
+   ,
+   parameter integer DATA_WIDTH  = PACKET_WIDTH,
+   parameter integer CONNECT_NUM = 3
    );
 
    parameter CYCLE = 100;
