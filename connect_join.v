@@ -33,7 +33,7 @@ module connect_join #
    input [DATA_WIDTH*CONNECT_NUM-1:0] RECEIVE_DATA,
    output reg [CONNECT_NUM-1:0]       RECEIVE_READY,
 
-   output reg                         SEND_VALID,
+   output                             SEND_VALID,
    output [DATA_WIDTH-1:0]            SEND_DATA,
    input                              SEND_READY
    );
@@ -50,13 +50,7 @@ module connect_join #
           receive_index = i1;
    end
 
-   // SEND_VALID
-   always @* begin
-      SEND_VALID = 1'b0;
-      for (i2 = 0; i2 < CONNECT_NUM; i2 = i2 + 1)
-        if (RECEIVE_VALID[i2])
-          SEND_VALID = 1'b1;
-   end
+   assign SEND_VALID = RECEIVE_VALID[receive_index];
 
    // SEND_DATA
    assign SEND_DATA = RECEIVE_DATA[DATA_WIDTH * (receive_index + 1) - 1 -: DATA_WIDTH];
