@@ -38,8 +38,9 @@ parameter integer PACKET_REQUEST_WIDTH = 99,
  arg1      = 19
  arg2      = 19
  exec      = 19
+ padding   = 1
 */
-parameter integer FUNCTION_WIDTH = 95,
+parameter integer FUNCTION_WIDTH = 96,
 
 /// 
 /// instructions number

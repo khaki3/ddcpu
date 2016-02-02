@@ -144,19 +144,14 @@ module tb_function_expander #
          fn_exec      = $random;
 
          fn = make_function(fn_coloring, fn_returning, fn_arg1, fn_arg2, fn_exec);
-         sendPC;         
+         sendPC;
 
          for (mem_count = 0; mem_count <= 2'h2; mem_count = mem_count + 1) begin
             receiveMEM;
-
             if (!(MEM_SEND_ADDR === FNADDR + pc_opcode + mem_count * 4))
               raiseError(8'h10);
 
-            if (mem_count === 3'h2)
-              MEM_RECEIVE_DATA = fn[30:0];
-            else
-              MEM_RECEIVE_DATA = fn[FUNCTION_WIDTH - 1 - mem_count * 32 -: 32];
-
+            MEM_RECEIVE_DATA = fn[FUNCTION_WIDTH - 1 - mem_count * 32 -: 32];
             sendMEM;
          end
       end

@@ -70,5 +70,5 @@ function automatic [FUNCTION_WIDTH-1:0] make_function;
    input [18:0] arg1;
    input [18:0] arg2;
    input [18:0] exec;
-   make_function = {coloring, returning, arg1, arg2, exec};
+   make_function = {coloring, returning, arg1, arg2, exec, 1'b0};
 endfunction

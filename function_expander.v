@@ -216,11 +216,8 @@ module function_expander #
       if (RST)
         current_fn_data <= 0;
       else if (MEM_RECEIVE_VALID && MEM_RECEIVE_READY)
-        if (mem_count == 2'd2)
-          current_fn_data[30:0] <= MEM_RECEIVE_DATA[30:0];
-        else
-          current_fn_data[FUNCTION_WIDTH - 1 - mem_count * 32 -: 32]
-            <= MEM_RECEIVE_DATA;
+        current_fn_data[FUNCTION_WIDTH - 1 - mem_count * 32 -: 32]
+          <= MEM_RECEIVE_DATA;
    end
 
    // SEND_PR_VALID

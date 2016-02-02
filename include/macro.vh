@@ -66,8 +66,8 @@
    wire [31:0] worker_result_data        = worker_result[31:0];
 
 `define extract_function(fn) \
-   wire [18:0] function_coloring  = fn[19 * 5 - 1 -: 19];\
-   wire [18:0] function_returning = fn[19 * 4 - 1 -: 19];\
-   wire [18:0] function_arg1      = fn[19 * 3 - 1 -: 19];\
-   wire [18:0] function_arg2      = fn[19 * 2 - 1 -: 19];\
-   wire [18:0] function_exec      = fn[19 * 1 - 1 -: 19];
+   wire [18:0] function_coloring  = fn[19 * 5 -: 19];\
+   wire [18:0] function_returning = fn[19 * 4 -: 19];\
+   wire [18:0] function_arg1      = fn[19 * 3 -: 19];\
+   wire [18:0] function_arg2      = fn[19 * 2 -: 19];\
+   wire [18:0] function_exec      = fn[19 * 1 -: 19];
