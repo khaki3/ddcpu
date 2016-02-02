@@ -67,11 +67,12 @@ module packet_loader #
    reg [PACKET_REQUEST_WIDTH-1:0] current_pr_data;
    reg [PACKET_WIDTH-1:0]         current_pc_data;
 
+   `include "include/macro.vh"
    `include "include/construct.vh"
    `extract_packet_request(current_pr_data)
    `extract_packet(current_pc_data)
 
-   reg [2:0] mem_count; // 0 ~ 5
+   reg [2:0] mem_count; // 0 ~ 4
    assign MEM_SEND_ADDR       = OPADDR + packet_request_dest_addr + mem_count * 4; // (32/8) = 4
    assign MEM_SEND_DATA_VALID = 1'b0;
    assign MEM_SEND_DATA       = 32'b0;
@@ -119,7 +120,7 @@ module packet_loader #
 
           S_MEM_RECEIVE:
             if (MEM_RECEIVE_VALID && MEM_RECEIVE_READY)
-              if (mem_count == 3'd5)
+              if (mem_count == 3'd4)
                 STATE <= S_SEND;
               else
                 STATE <= S_MEM_SEND;
@@ -135,7 +136,7 @@ module packet_loader #
       if (RST)
         mem_count <= 3'd0;
       else if (MEM_RECEIVE_VALID && MEM_RECEIVE_READY)
-        if (mem_count == 3'd5)
+        if (mem_count == 3'd4)
           mem_count <= 3'd0;
         else
           mem_count <= mem_count + 1;
@@ -154,11 +155,8 @@ module packet_loader #
       if (RST)
         current_pc_data <= 0;
       else if (MEM_RECEIVE_VALID && MEM_RECEIVE_READY)
-        if (mem_count == 3'd5)
-          current_pc_data[14:0] <= MEM_RECEIVE_DATA[14:0];
-        else
-          current_pc_data[PACKET_WIDTH - 1 - mem_count * 32 -: 32]
-            <= MEM_RECEIVE_DATA;
+        current_pc_data[PACKET_WIDTH - 1 - mem_count * 32 -: 32]
+          <= MEM_RECEIVE_DATA;
    end
 
    // RECEIVE_PR_READY

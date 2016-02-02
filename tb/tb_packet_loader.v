@@ -132,7 +132,7 @@ module tb_packet_loader #
 
    reg [PACKET_WIDTH-1:0] template_packet;
    reg [PACKET_REQUEST_WIDTH-1:0] packet_request;
-   reg [PACKET_WIDTH-1:0] SEND_PC_DATA;
+   reg [PACKET_WIDTH-1:0] SEND_PC_DATA, correct_pc;
 
    reg [15:0] dest_addr;
    reg [2:0]  mem_count;
@@ -159,17 +159,13 @@ module tb_packet_loader #
          RECEIVE_PR_DATA = packet_request;
          sendPR;
 
-         for (mem_count = 0; mem_count <= 3'h5; mem_count = mem_count + 1) begin
+         for (mem_count = 0; mem_count <= 3'h4; mem_count = mem_count + 1) begin
             receiveMEM;
 
             if (!(MEM_SEND_ADDR === OPADDR + dest_addr + mem_count * 4))
               raiseError({3'b100, mem_count, opmode, dest_option});
 
-            if (mem_count === 3'h5)
-               MEM_RECEIVE_DATA = template_packet[14:0];
-            else
-               MEM_RECEIVE_DATA = template_packet[PACKET_WIDTH - 1 - mem_count * 32 -: 32];
-
+            MEM_RECEIVE_DATA = template_packet[PACKET_WIDTH - 1 - mem_count * 32 -: 32];
             sendMEM;
          end
 
@@ -196,8 +192,8 @@ module tb_packet_loader #
              raiseError({3'b101, opmode, dest_option});
          endcase
 
-         if (!(SEND_PC_DATA === make_packet_from_request(template_packet,
-                                                         packet_request)))
+         correct_pc = make_packet_from_request(template_packet, packet_request);
+         if (!(SEND_PC_DATA[PACKET_WIDTH-1:16] === correct_pc[PACKET_WIDTH-1:16]))
            raiseError({3'b110, opmode, dest_option});
       end
    endtask
