@@ -159,7 +159,7 @@ module ddcpu #
    // STOP
    always @ (posedge CLK) begin
       if (RST)
-        STOP <= 0;
+        STOP <= 1;
       else if (EXECUTION_END)
         STOP <= 1;
       else if (START && STOP)
@@ -247,7 +247,7 @@ module ddcpu #
             .RECEIVE_PC_READY (wk_receive_pc_ready),
 
             .SEND_WR_VALID (wk_send_wr_valid),
-            .SEND_WR_DAT   (wk_send_wr_data),
+            .SEND_WR_DATA  (wk_send_wr_data),
             .SEND_WR_READY (wk_send_wr_ready));
       end
    endgenerate
@@ -320,7 +320,7 @@ module ddcpu #
       for (i_ic = 0; i_ic < WORKER_NUM; i_ic = i_ic + 1) begin
          ic_to_dp_receive_valid[i_ic+1] = wk_send_wr_valid[i_ic];
          ic_to_dp_receive_data[WORKER_RESULT_WIDTH * (i_ic + 2) - 1 -: WORKER_RESULT_WIDTH]
-           = wk_send_wr_data[i_ic+1];
+           = wk_send_wr_data[i_ic];
          ic_to_dp_receive_ready[i_ic+1] = wk_send_wr_ready[i_ic];
       end
    end
@@ -444,7 +444,7 @@ module ddcpu #
    connect_join #
      (
       .DATA_WIDTH  (PACKET_REQUEST_WIDTH),
-      .CONNECT_NUM (3)
+      .CONNECT_NUM (4)
       ) cjToPC
      (.RECEIVE_VALID ({pl_receive_pr_valid_from_dp,
                        pl_receive_pr_valid_from_mm,
