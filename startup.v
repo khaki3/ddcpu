@@ -43,7 +43,7 @@ module startup #
    `include "include/construct.vh"
 
    assign SEND_PR_DATA
-     = make_packet_request(DEST_OPTION_EXEC, 16'b0, 16'b0, 32'b0, 32'b0);
+     = make_packet_request(DEST_OPTION_END, 16'b0, 16'b0, 32'b0, 32'b0);
 
    reg STATE;
 
