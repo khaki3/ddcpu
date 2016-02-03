@@ -41,7 +41,7 @@ module matching_memory #
    );
 
    <SCM>
-     (define-constant MEM_SIZE 1024)
+     (define-constant MEM_SIZE 128)
      (print #"localparam MEM_SIZE = ~MEM_SIZE;")
    </SCM>
    localparam integer SEARCH_DELAY = 4;
