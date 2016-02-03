@@ -85,13 +85,13 @@ For setting the destination of the return packet.
 #### padding (1bits)
 
 ### worker-result
-* dest-option (32bits)
+* dest-option (3bits)
 * dest-addr (16bits)
 * color (16bits)
 * data (32bits)
 
 ### packet-request
-* dest-option (32bits)
+* dest-option (3bits)
 * dest-addr (16bits)
 * color (16bits)
 * arg1, arg2 (32bits)
