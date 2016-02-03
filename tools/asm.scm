@@ -142,7 +142,8 @@
                    (def-arg1 def)
                    (def-arg2 def)
                    (def-exec def))])
-    (if (null? lst) ret
+    (if (null? lst)
+        (ash ret 1) ; padding
         (loop
          (logior (ash ret 19)
                  (dest->binary (car lst) base))
@@ -164,7 +165,7 @@
 
 (define (def->function-u8vector def base)
   (let1 fb (def->function-binary def base)
-    (number->u8vector fb (* 32 3))))
+    (number->u8vector fb FNADDR_STEP)))
 
 (define (make-function-table defs def-order)
   (apply
