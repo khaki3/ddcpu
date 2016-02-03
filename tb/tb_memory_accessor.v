@@ -123,8 +123,8 @@ module tb_memory_accessor #
 
          receiveMEM;
          if (!(MEM_SEND_ADDR === data1 &&
-               (opcode == MA_PEEK) ? MEM_SEND_DATA_VALID === 1'b0 :
-               (opcode == MA_POKE) ? MEM_SEND_DATA_VALID === 1'b1 : 1'b0))
+               (opcode == MA_REF) ? MEM_SEND_DATA_VALID === 1'b0 :
+               (opcode == MA_SET) ? MEM_SEND_DATA_VALID === 1'b1 : 1'b0))
            raiseError('h10);
 
          MEM_RECEIVE_DATA = mem;
@@ -144,8 +144,8 @@ module tb_memory_accessor #
    initial begin
       initTest;
       for (i = 0; i < 100; i = i + 1) begin
-         maTest(MA_PEEK);
-         maTest(MA_POKE);
+         maTest(MA_REF);
+         maTest(MA_SET);
       end
       $display("finish");
       $stop;

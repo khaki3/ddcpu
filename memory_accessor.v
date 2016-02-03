@@ -53,8 +53,8 @@ module memory_accessor #
    `include "include/construct.vh"
    `extract_packet(current_pc_data)
 
-   wire ma_peek = (packet_opcode == MA_PEEK);
-   wire ma_poke = (packet_opcode == MA_POKE);
+   wire ma_peek = (packet_opcode == MA_REF);
+   wire ma_poke = (packet_opcode == MA_SET);
 
    assign MEM_SEND_ADDR       = packet_data1;
    assign MEM_SEND_DATA       = packet_data2;
