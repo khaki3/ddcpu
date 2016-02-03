@@ -72,9 +72,6 @@ module ddcpu #
    output                               M_AXI_RREADY
    );
 
-   //
-   // memory controller
-   //
    wire mc_receive_addr_valid;
    wire [31:0] mc_receive_addr;
    wire mc_receive_data_valid;
@@ -91,6 +88,103 @@ module ddcpu #
    assign M_AXI_ARADDR = {3'b001, ARADDR[28:0]};
    assign M_AXI_AWADDR = {3'b001, AWADDR[28:0]};
 
+   wire EXECUTION_END;
+
+   wire startup_send_pr_valid;
+   wire [PACKET_REQUEST_WIDTH-1:0] startup_send_pr_data;
+   wire startup_send_pr_ready;
+   wire qu_receive_pc_valid;
+   wire [PACKET_WIDTH-1:0] qu_receive_pc_data;
+   wire qu_receive_pc_ready;
+
+   wire qu_send_pc_valid;
+   wire [PACKET_WIDTH-1:0] qu_send_pc_data;
+   wire qu_send_pc_ready;
+   wire [WORKER_NUM-1:0] wk_receive_pc_valid;
+   wire [PACKET_WIDTH-1:0] wk_receive_pc_data [WORKER_NUM-1:0];
+   wire [WORKER_NUM-1:0] wk_receive_pc_ready;
+
+   wire [WORKER_NUM-1:0] wk_send_wr_valid;
+   reg  [WORKER_RESULT_WIDTH-1:0] wk_send_wr_data [WORKER_NUM-1:0];
+   wire [WORKER_NUM-1:0] wk_send_wr_ready;
+
+   wire [PACKET_WIDTH*WORKER_NUM-1:0] entire_wk_receive_pc_data;
+
+   wire ma_receive_pc_valid;
+   wire [PACKET_WIDTH-1:0] ma_receive_pc_data;
+   wire ma_receive_pc_ready;
+
+   wire ma_send_wr_valid;
+   wire [WORKER_RESULT_WIDTH-1:0] ma_send_wr_data;
+   wire ma_send_wr_ready;
+
+   wire ma_mem_send_addr_valid;
+   wire [31:0] ma_mem_send_addr;
+   wire ma_mem_send_data_valid;
+   wire [31:0] ma_mem_send_data;
+   wire ma_mem_send_ready;
+
+   wire ma_mem_receive_valid;
+   wire [31:0] ma_mem_receive_data;
+   wire ma_mem_receive_ready;
+
+   wire dp_receive_pr_valid;
+   wire [WORKER_RESULT_WIDTH-1:0] dp_receive_pr_data;
+   wire dp_receive_pr_ready;
+
+   wire pl_receive_pr_valid_from_dp;
+   wire [PACKET_REQUEST_WIDTH-1:0] pl_receive_pr_data_from_dp;
+   wire pl_receive_pr_ready_from_dp;
+
+   // WORKER_NUM-1 + 1
+   wire [WORKER_NUM:0] ic_to_dp_receive_valid;
+   wire [(WORKER_NUM+1)*WORKER_RESULT_WIDTH-1:0] ic_to_dp_receive_data;
+   wire [WORKER_NUM:0] ic_to_dp_receive_ready;
+
+   wire mm_receive_wr_valid;
+   wire [WORKER_RESULT_WIDTH-1:0] mm_receive_wr_data;
+   wire mm_receive_wr_ready;
+
+   wire pl_receive_pr_valid_from_mm;
+   wire [PACKET_REQUEST_WIDTH-1:0] pl_receive_pr_data_from_mm;
+   wire pl_receive_pr_ready_from_mm;
+
+   wire fe_mem_send_addr_valid;
+   wire [31:0] fe_mem_send_addr;
+   wire fe_mem_send_data_valid;
+   wire [31:0] fe_mem_send_data;
+   wire fe_mem_send_ready;
+
+   wire fe_mem_receive_valid;
+   wire [31:0] fe_mem_receive_data;
+   wire fe_mem_receive_ready;
+
+   wire fe_receive_pc_valid;
+   wire [PACKET_WIDTH-1:0] fe_receive_pc_data;
+   wire fe_receive_pc_ready;
+
+   wire pl_receive_pr_valid_from_fe;
+   wire [PACKET_REQUEST_WIDTH-1:0] pl_receive_pr_data_from_fe;
+   wire pl_receive_pr_ready_from_fe;
+
+   wire pl_receive_pr_valid;
+   wire [PACKET_REQUEST_WIDTH-1:0] pl_receive_pr_data;
+   wire pl_receive_pr_ready;
+
+   wire pl_mem_send_addr_valid;
+   wire [31:0] pl_mem_send_addr;
+   wire pl_mem_send_data_valid;
+   wire [31:0] pl_mem_send_data;
+   wire pl_mem_send_ready;
+
+   wire pl_mem_receive_valid;
+   wire [31:0] pl_mem_receive_data;
+   wire pl_mem_receive_ready;
+
+
+   //
+   // memory controller
+   //
    memory_controller memory_controller
      (
       .CLK     (CLK),
@@ -154,7 +248,6 @@ module ddcpu #
    //
    // startup
    //
-   wire EXECUTION_END;
 
    // STOP
    always @ (posedge CLK) begin
@@ -166,10 +259,6 @@ module ddcpu #
         STOP <= 0;
    end
 
-   wire startup_send_pr_valid;
-   wire [PACKET_REQUEST_WIDTH-1:0] startup_send_pr_data;
-   wire startup_send_pr_ready;
-   
    startup startup
      (.CLK(CLK), .RST(RST),
 
@@ -184,14 +273,6 @@ module ddcpu #
    //
    // QUEUE
    //
-   wire qu_receive_pc_valid;
-   wire [PACKET_WIDTH-1:0] qu_receive_pc_data;
-   wire qu_receive_pc_ready;
-
-   wire qu_send_pc_valid;
-   wire [PACKET_WIDTH-1:0] qu_send_pc_data;
-   wire qu_send_pc_ready;
-
    queue queue
      (.CLK(CLK), .RST(RST),
 
@@ -206,16 +287,6 @@ module ddcpu #
    //
    // WORKER
    //
-   wire [WORKER_NUM-1:0] wk_receive_pc_valid;
-   wire [PACKET_WIDTH-1:0] wk_receive_pc_data [WORKER_NUM-1:0];
-   wire [WORKER_NUM-1:0] wk_receive_pc_ready;
-
-   wire [WORKER_NUM-1:0] wk_send_wr_valid;
-   reg  [WORKER_RESULT_WIDTH-1:0] wk_send_wr_data [WORKER_NUM-1:0];
-   wire [WORKER_NUM-1:0] wk_send_wr_ready;
-
-   wire [PACKET_WIDTH*WORKER_NUM-1:0] entire_wk_receive_pc_data;
-
    integer i_ewk;
    always @*
       for (i_ewk = 0; i_ewk < WORKER_NUM; i_ewk = i_ewk + 1)
@@ -255,24 +326,6 @@ module ddcpu #
    //
    // memory accessor
    //
-   wire ma_receive_pc_valid;
-   wire [PACKET_WIDTH-1:0] ma_receive_pc_data;
-   wire ma_receive_pc_ready;
-
-   wire ma_send_wr_valid;
-   wire [WORKER_RESULT_WIDTH-1:0] ma_send_wr_data;
-   wire ma_send_wr_ready;
-
-   wire ma_mem_send_addr_valid;
-   wire [31:0] ma_mem_send_addr;
-   wire ma_mem_send_data_valid;
-   wire [31:0] ma_mem_send_data;
-   wire ma_mem_send_ready;
-
-   wire ma_mem_receive_valid;
-   wire [31:0] ma_mem_receive_data;
-   wire ma_mem_receive_ready;
-
    memory_accessor ma
      (
       .CLK(CLK), .RST(RST),
@@ -298,21 +351,7 @@ module ddcpu #
    //
    // DISPATCHER
    //
-   wire dp_receive_pr_valid;
-   wire [WORKER_RESULT_WIDTH-1:0] dp_receive_pr_data;
-   wire dp_receive_pr_ready;
-
-   wire pl_receive_pr_valid_from_dp;
-   wire [PACKET_REQUEST-1:0] pl_receive_pr_data_from_dp;
-   wire pl_receive_pr_ready_from_dp;
-
-   // WORKER_NUM-1 + 1
-   wire [WORKER_NUM:0] ic_to_dp_receive_valid;
-   wire [(WORKER_NUM+1)*WORKER_RESULT_WIDTH-1:0] ic_to_dp_receive_data;
-   wire [WORKER_NUM:0] ic_to_dp_receive_ready;
-
    integer i_ic;
-
    always @* begin
       ic_to_dp_receive_valid[0] = ma_send_wr_valid;
       ic_to_dp_receive_data[WORKER_RESULT_WIDTH-1:0] = ma_send_wr_data;
@@ -360,14 +399,6 @@ module ddcpu #
    //
    // matching memory
    //
-   wire mm_receive_wr_valid;
-   wire [WORKER_RESULT_WIDTH-1:0] mm_receive_wr_data;
-   wire mm_receive_wr_ready;
-
-   wire pl_receive_pr_valid_from_mm;
-   wire [PACKET_REQUEST-1:0] pl_receive_pr_data_from_mm;
-   wire pl_receive_pr_ready_from_mm;
-
    matching_memory mm
      (.CLK(CLK), .RST(RST),
       .RECEIVE_WR_VALID (mm_receive_wr_valid),
@@ -382,24 +413,6 @@ module ddcpu #
    //
    // function expander
    //
-   wire fe_mem_send_addr_valid;
-   wire [31:0] fe_mem_send_addr;
-   wire fe_mem_send_data_valid;
-   wire [31:0] fe_mem_send_data;
-   wire fe_mem_send_ready;
-
-   wire fe_mem_receive_valid;
-   wire [31:0] fe_mem_receive_data;
-   wire fe_mem_receive_ready;
-
-   wire fe_receive_pc_valid;
-   wire [PACKET_WIDTH-1:0] fe_receive_pc_data;
-   wire fe_receive_pc_ready;
-
-   wire pl_receive_pr_valid_from_fe;
-   wire [PACKET_REQUEST-1:0] pl_receive_pr_data_from_fe;
-   wire pl_receive_pr_ready_from_fe;
-
    function_expander fe
      (.CLK(CLK), .RST(RST),
       .FNADDR(FNADDR),
@@ -425,19 +438,6 @@ module ddcpu #
    //
    // packet loader
    //
-   wire pl_receive_pr_valid;
-   wire [PACKET_REQUEST_WIDTH-1:0] pl_receive_pr_data;
-   wire pl_receive_pr_ready;
-
-   wire pl_mem_send_addr_valid;
-   wire [31:0] pl_mem_send_addr;
-   wire pl_mem_send_data_valid;
-   wire [31:0] pl_mem_send_data;
-   wire pl_mem_send_ready;
-
-   wire pl_mem_receive_valid;
-   wire [31:0] pl_mem_receive_data;
-   wire pl_mem_receive_ready;
 
    // [dispatcher, matching_memory, function_expander, startup]
    // -> packet_loader
