@@ -12,7 +12,7 @@ module tb_packet_loader #
    reg  CLK;
    reg  RST;
 
-   wire [31:0] OPADDR = 32'h2000_0000;
+   wire [31:0] PCADDR = 32'h2000_0000;
    wire        MEM_SEND_ADDR_VALID;
    wire [31:0] MEM_SEND_ADDR;
    wire        MEM_SEND_DATA_VALID;
@@ -44,7 +44,7 @@ module tb_packet_loader #
    packet_loader p0
      (.CLK(CLK), .RST(RST),
 
-      .OPADDR (OPADDR),
+      .PCADDR (PCADDR),
 
       .MEM_SEND_ADDR_VALID (MEM_SEND_ADDR_VALID),
       .MEM_SEND_ADDR       (MEM_SEND_ADDR),
@@ -162,7 +162,7 @@ module tb_packet_loader #
          for (mem_count = 0; mem_count <= 3'h4; mem_count = mem_count + 1) begin
             receiveMEM;
 
-            if (!(MEM_SEND_ADDR === OPADDR + dest_addr + mem_count * 4))
+            if (!(MEM_SEND_ADDR === PCADDR + dest_addr + mem_count * 4))
               raiseError({3'b100, mem_count, opmode, dest_option});
 
             MEM_RECEIVE_DATA = template_packet[PACKET_WIDTH - 1 - mem_count * 32 -: 32];

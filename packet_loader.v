@@ -35,7 +35,7 @@ module packet_loader #
    input                            CLK,
    input                            RST,
 
-   input [31:0]                     OPADDR, 
+   input [31:0]                     PCADDR,
 
    output reg                       MEM_SEND_ADDR_VALID,
    output [31:0]                    MEM_SEND_ADDR,
@@ -73,7 +73,7 @@ module packet_loader #
    `extract_packet(current_pc_data)
 
    reg [2:0] mem_count; // 0 ~ 4
-   assign MEM_SEND_ADDR       = OPADDR + packet_request_dest_addr + mem_count * 4; // (32/8) = 4
+   assign MEM_SEND_ADDR       = PCADDR + packet_request_dest_addr + mem_count * 4; // (32/8) = 4
    assign MEM_SEND_DATA_VALID = 1'b0;
    assign MEM_SEND_DATA       = 32'b0;
    assign MEM_RECEIVE_READY   = 1'b1;

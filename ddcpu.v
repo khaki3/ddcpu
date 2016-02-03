@@ -20,7 +20,7 @@ module ddcpu #
    output reg                           STOP, 
 
    // PROGRAM ADDR
-   input [31:0]                         OPADDR,
+   input [31:0]                         PCADDR,
    input [31:0]                         FNADDR,
 
    // AXI
@@ -468,7 +468,7 @@ module ddcpu #
    packet_loader pl
      (.CLK(CLK), .RST(RST),
 
-      .OPADDR(OPADDR),
+      .PCADDR(PCADDR),
 
       .MEM_SEND_ADDR_VALID (pl_mem_send_addr_valid),
       .MEM_SEND_ADDR       (pl_mem_send_addr),
