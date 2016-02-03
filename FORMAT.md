@@ -66,12 +66,12 @@ This cpu stops.
 #### dest-addr (16bits)
 This indicates the address of the dest-packet.
 
-#### color (16bits)
+#### color (16its)
 
 
 ### function
 A structure for expanding functions.
-All elements contain dest-option and dest-addr (the size is 16 + 3 = 19bits).
+All elements contain dest-option and dest-addr (the size is 3 + 16 = 19bits).
 The packets of the destination will be loaded.
 
 #### coloring (19bits)
@@ -82,7 +82,7 @@ For setting the destination of the return packet.
 
 #### arg1, arg2 (19bits)
 #### exec (19bits)
-
+#### padding (1bits)
 
 ### worker-result
 * dest-option (32bits)
