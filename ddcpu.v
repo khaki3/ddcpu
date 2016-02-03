@@ -101,12 +101,12 @@ module ddcpu #
    wire [PACKET_WIDTH-1:0] qu_send_pc_data;
    wire qu_send_pc_ready;
    wire [WORKER_NUM-1:0] wk_receive_pc_valid;
-   wire [PACKET_WIDTH-1:0] wk_receive_pc_data [WORKER_NUM-1:0];
+   reg  [PACKET_WIDTH-1:0] wk_receive_pc_data [WORKER_NUM-1:0];
    wire [WORKER_NUM-1:0] wk_receive_pc_ready;
 
    wire [WORKER_NUM-1:0] wk_send_wr_valid;
-   reg  [WORKER_RESULT_WIDTH-1:0] wk_send_wr_data [WORKER_NUM-1:0];
-   wire [WORKER_NUM-1:0] wk_send_wr_ready;
+   wire [WORKER_RESULT_WIDTH-1:0] wk_send_wr_data [WORKER_NUM-1:0];
+   reg  [WORKER_NUM-1:0] wk_send_wr_ready;
 
    wire [PACKET_WIDTH*WORKER_NUM-1:0] entire_wk_receive_pc_data;
 
@@ -116,7 +116,7 @@ module ddcpu #
 
    wire ma_send_wr_valid;
    wire [WORKER_RESULT_WIDTH-1:0] ma_send_wr_data;
-   wire ma_send_wr_ready;
+   reg  ma_send_wr_ready;
 
    wire ma_mem_send_addr_valid;
    wire [31:0] ma_mem_send_addr;
@@ -137,8 +137,8 @@ module ddcpu #
    wire pl_receive_pr_ready_from_dp;
 
    // WORKER_NUM-1 + 1
-   wire [WORKER_NUM:0] ic_to_dp_receive_valid;
-   wire [(WORKER_NUM+1)*WORKER_RESULT_WIDTH-1:0] ic_to_dp_receive_data;
+   reg  [WORKER_NUM:0] ic_to_dp_receive_valid;
+   reg  [(WORKER_NUM+1)*WORKER_RESULT_WIDTH-1:0] ic_to_dp_receive_data;
    wire [WORKER_NUM:0] ic_to_dp_receive_ready;
 
    wire mm_receive_wr_valid;
@@ -290,7 +290,7 @@ module ddcpu #
    integer i_ewk;
    always @*
       for (i_ewk = 0; i_ewk < WORKER_NUM; i_ewk = i_ewk + 1)
-        wk_send_wr_data[i_ewk]
+        wk_receive_pc_data[i_ewk]
           = entire_wk_receive_pc_data[PACKET_WIDTH * (i_ewk + 1) - 1 -: PACKET_WIDTH];
 
    // queue -> workers
@@ -313,13 +313,13 @@ module ddcpu #
          worker wk
            (.CLK(CLK), .RST(RST),
 
-            .RECEIVE_PC_VALID (wk_receive_pc_valid),
-            .RECEIVE_PC_DATA  (wk_receive_pc_data),
-            .RECEIVE_PC_READY (wk_receive_pc_ready),
+            .RECEIVE_PC_VALID (wk_receive_pc_valid[wi]),
+            .RECEIVE_PC_DATA  (wk_receive_pc_data[wi]),
+            .RECEIVE_PC_READY (wk_receive_pc_ready[wi]),
 
-            .SEND_WR_VALID (wk_send_wr_valid),
-            .SEND_WR_DATA  (wk_send_wr_data),
-            .SEND_WR_READY (wk_send_wr_ready));
+            .SEND_WR_VALID (wk_send_wr_valid[wi]),
+            .SEND_WR_DATA  (wk_send_wr_data[wi]),
+            .SEND_WR_READY (wk_send_wr_ready[wi]));
       end
    endgenerate
 
@@ -355,12 +355,12 @@ module ddcpu #
    always @* begin
       ic_to_dp_receive_valid[0] = ma_send_wr_valid;
       ic_to_dp_receive_data[WORKER_RESULT_WIDTH-1:0] = ma_send_wr_data;
-      ic_to_dp_receive_ready[0] = ma_send_wr_ready;
+      ma_send_wr_ready = ic_to_dp_receive_ready[0];
       for (i_ic = 0; i_ic < WORKER_NUM; i_ic = i_ic + 1) begin
          ic_to_dp_receive_valid[i_ic+1] = wk_send_wr_valid[i_ic];
          ic_to_dp_receive_data[WORKER_RESULT_WIDTH * (i_ic + 2) - 1 -: WORKER_RESULT_WIDTH]
            = wk_send_wr_data[i_ic];
-         ic_to_dp_receive_ready[i_ic+1] = wk_send_wr_ready[i_ic];
+         wk_send_wr_ready[i_ic] = ic_to_dp_receive_ready[i_ic+1];
       end
    end
 
