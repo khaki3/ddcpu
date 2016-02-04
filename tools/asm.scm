@@ -12,12 +12,12 @@
 ;; exec, one, left, right, nop
 <dest> ::= ([eolrn] <packet-number>)
 
-<packet> ::= (<dest> <op> <arg> <arg> <arg> <arg>)
+<packet> ::= (<dest> <op> <data> <data> <data> <data>)
 
 <op> ::= op-symbol | fun-name
 
 ;; '_' will be undefined value
-<arg> ::= 32bits binary | '_' | <dest>
+<data> ::= 32bits binary | '_' | <dest>
 
 ;; packet-number will be began from 0
 <packet-number> ::= <number>
@@ -81,7 +81,7 @@
 (define-record-type packet %make-packet #t
   dest
   op
-  args)
+  data)
 
 (define-constant PCADDR_STEP 16) ; (/ (* 32 4) 8)
 (define-constant FNADDR_STEP 12) ; (/ (* 32 3) 8)
@@ -115,14 +115,19 @@
 
 (define DEF_BASE #f)
 
-(define (fn-base def)
-  (~ (assq-ref DEF_BASE (def-name def)) 0))
+(define (base-search name)
+  (assq-ref DEF_BASE name))
 
-(define (pc-base def)
-  (~ (assq-ref DEF_BASE (def-name def)) 1))
+(define (fn-base name)
+  (and-let1 x (base-search name)
+    (~ x 0)))
+
+(define (pc-base name)
+  (and-let1 x (base-search name)
+    (~ x 1)))
 
 ;; exec, one, left, right, nop
-(define (dest-option->binary dest-option)
+(define (dest-option-binary dest-option)
   (match dest-option
     ['e #b000]
     ['o #b001]
@@ -130,9 +135,9 @@
     ['r #b011]
     ['n #b100]))
 
-(define (dest->binary dest base)
+(define (dest-binary dest base)
   (logior
-   (ash (dest-option->binary (dest-option dest)) 16)
+   (ash (dest-option-binary (dest-option dest)) 16)
    (+ (* PCADDR_STEP (dest-packet-number dest)) base)))
 
 (define (def->function-binary def base)
@@ -147,7 +152,7 @@
         (ash ret 1) ; padding
         (loop
          (logior (ash ret 19)
-                 (dest->binary (car lst) base))
+                 (dest-binary (car lst) base))
          (cdr lst)))))
 
 (define (byte-ref val i)
@@ -168,73 +173,89 @@
   (let1 fb (def->function-binary def base)
     (number->u8vector fb FNADDR_STEP)))
 
+(define-syntax generate-u8vector
+  (syntax-rules ()
+    [(_ proc lst)
+     (apply u8vector-append
+       (map proc lst))]))
+
 (define (make-function-table defs)
-  (apply
-   u8vector-append
-   (map
-    (^[d] (def->function-u8vector d (pc-base d)))
-    defs)))
+  (generate-u8vector
+   (^[d] (def->function-u8vector d (pc-base (def-name d))))
+   defs))
 
-;
-; TODO
-;
-; CALL
-; SWITCH
-; SYNC
-; REF
-; SET
-; SET_COLOR
-; DISTRIBUTE
-; +
-;
-
-#|!delete this!
-;; <packet> ::= (<dest> <op> <arg> <arg> <arg> <arg>)
-
-;; <op> ::= op-symbol | fun-name
-
-;; ;; '_' will be undefined value
-;; <arg> ::= 32bits binary | '_' | <dest>
-
-;(define-record-type packet %make-packet #t
-;  dest
-;  op
-;  args)
-|#
-
-(define (%bitstyle-inner vals sizes)
-  (let loop ([ret 0] [vals vals] [sizes sizes])
-    (if (null? vals) ret
+(define (%bitstyle-inner sizes vals)
+  (let loop ([ret 0] [sizes sizes] [vals vals])
+    (if (null? sizes) ret
         (loop (logior (ash ret (car sizes)) (car vals))
-              (cdr vals)
-              (cdr sizes)))))
+              (cdr sizes)
+              (cdr vals)))))
 
 (define-syntax bitstyle
   (syntax-rules ()
-    [(_ (val bit-size) ...)
-     (%bitstyle-inner (list val ...) (list bit-size ...))]))
+    [(_ (bit-size val) ...)
+     (%bitstyle-inner (list bit-size ...) (list val ...))]))
+
+(define (embinsn-binary op)
+  (and-let1 opcode (match op
+                     ['DISTRIBUTE #x000]
+                     ['SWITCH     #x001]
+                     ['SET_COLOR  #x002]
+                     ['SYNC       #x003]
+                     ['+          #x100]
+                     [else        #f])
+    (bitstyle
+     [2  #b00]
+     [10 opcode])))
+
+(define (memaccess-binary op)
+  (and-let1 opcode (match op
+                     ['REF #x000]
+                     ['SET #x001]
+                     [else #f])
+    (bitstyle
+     [2  #b01]
+     [10 opcode])))
+
+(define (fncall-binary op)
+  (and-let1 opcode (fn-base op)
+    (bitstyle
+     [2  #x10]
+     [10 opcode])))
 
 (define (op-binary op)
-  ; TODO
-  )
+  (or (embinsn-binary   op)
+      (memaccess-binary op)
+      (fncall-binary    op)))
+
+(define (data-binary data base)
+  (if (dest? data)
+      (dest-binary data base)
+      data))
+
+(define (packet->packet-u8vector packet base)
+  (number->u8vector
+   (bitstyle
+    [12 (op-binary (packet-op packet))]
+
+    [32 (data-binary (~ (packet-data packet) 0) base)]
+    [32 (data-binary (~ (packet-data packet) 1) base)]
+    [32 (data-binary (~ (packet-data packet) 2) base)]
+    [32 (data-binary (~ (packet-data packet) 3) base)]
+
+    [19 (dest-binary (packet-dest packet) base)]
+    [1  0]) ; padding
+   PCADDR_STEP))
 
 (define (def->packet-u8vector def base)
-  #u8()
-  )
-  ;; (number->u8vector
-  ;;  (bitstyle
-  ;;   [(op-binary (d 12
-  ;;     ; TODO
-  ;;   []
-  ;;   [])
-  ;;  PCADDR_STEP))
+  (generate-u8vector
+   (^[p] (packet->packet-u8vector p base))
+   (def-packets def)))
 
 (define (make-packet-table defs)
-  (apply
-   u8vector-append
-   (map
-    (^[d] (def->packet-u8vector d (pc-base d)))
-    defs)))
+  (generate-u8vector
+   (^[d] (def->packet-u8vector d (pc-base (def-name d))))
+   defs))
 
 ;; defs -> (values function-table packet-table)
 (define (assemble defs)
