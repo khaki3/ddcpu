@@ -83,7 +83,7 @@
   op
   data)
 
-(define-constant PCADDR_STEP 16) ; (/ (* 32 4) 8)
+(define-constant PCADDR_STEP 20) ; (/ (* 32 5) 8)
 (define-constant FNADDR_STEP 12) ; (/ (* 32 3) 8)
 
 (define (find&delete pred lst)
@@ -220,7 +220,7 @@
 (define (fncall-binary op)
   (and-let1 opcode (fn-base op)
     (bitstyle
-     [2  #x10]
+     [2  #b10]
      [10 opcode])))
 
 (define (op-binary op)
