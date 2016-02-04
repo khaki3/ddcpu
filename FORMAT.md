@@ -17,11 +17,12 @@ Memory usage
 
 ### packet table
 ```
-|packet[0][_     ]| (PCADDR)
-|packet[0][ _    ]|
-|packet[0][   _  ]|
-|packet[0][    _ ]|
-|packet[1][_     ]|
+|packet[0][_      ]| (PCADDR)
+|packet[0][ _     ]|
+|packet[0][   _   ]|
+|packet[0][    _  ]|
+|packet[0][     _ ]|
+|packet[1][_      ]|
 ...
 ```
 
