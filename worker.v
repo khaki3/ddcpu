@@ -44,10 +44,7 @@ module worker #
    `extract_packet(current_pc_data)
 
    wire insn_distribute = (packet_opcode == INSN_DISTRIBUTE);
-   wire insn_switch     = (packet_opcode == INSN_SWITCH);
-   wire insn_set_color  = (packet_opcode == INSN_SET_COLOR);
    wire insn_sync       = (packet_opcode == INSN_SYNC);
-   wire insn_plus       = (packet_opcode == INSN_PLUS);
 
    localparam
      S_RECEIVE = 2'b00,
@@ -125,6 +122,19 @@ module worker #
                                                 packet_dest_addr,
                                                 packet_color,
                                                 packet_data1 + packet_data2);
+
+           INSN_AND:
+             SEND_WR_DATA <= make_worker_result(packet_dest_option,
+                                                packet_dest_addr,
+                                                packet_color,
+                                                packet_data1 & packet_data2);
+
+           INSN_NZ:
+             SEND_WR_DATA <= make_worker_result(packet_dest_option,
+                                                packet_dest_addr,
+                                                packet_color,
+                                                packet_data1 != 0);
+
          endcase
       end
    end

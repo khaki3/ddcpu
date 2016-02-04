@@ -265,6 +265,87 @@ module tb_worker #
            raiseError('h50);
       end
    endtask
+   
+   task andTest;
+      begin
+         //
+         dest_option1 = 3'b110;
+         dest_addr1   = 16'h0101;
+         color        = 16'h1111;
+
+         data1 = 32'hdead_dead;
+         data2 = 32'hbeef_beef;
+
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
+                                       INSN_AND,
+                                       data1,
+                                       data2,
+                                       data3,
+                                       data4,
+                                       dest_option1,
+                                       dest_addr1,
+                                       color);
+
+         sendPC;
+         receiveWR;
+
+         if (!(SEND_WR_DATA === make_worker_result(dest_option1,
+                                                   dest_addr1,
+                                                   color,
+                                                   data1 & data2)))
+           raiseError('h60);
+      end
+   endtask
+   
+   task nzTest;
+      begin
+         //
+         dest_option1 = 3'b110;
+         dest_addr1   = 16'heeee;
+         color        = 16'hff00;
+
+         data1 = 32'h0010_0000;
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
+                                       INSN_NZ,
+                                       data1,
+                                       data2,
+                                       data3,
+                                       data4,
+                                       dest_option1,
+                                       dest_addr1,
+                                       color);
+
+         sendPC;
+         receiveWR;
+
+         if (!(SEND_WR_DATA === make_worker_result(dest_option1,
+                                                   dest_addr1,
+                                                   color,
+                                                   1)))
+           raiseError('h70);
+
+
+         data1 = 32'h0000_0000;
+         RECEIVE_PC_DATA = make_packet(OPCODE_EI,
+                                       INSN_NZ,
+                                       data1,
+                                       data2,
+                                       data3,
+                                       data4,
+                                       dest_option1,
+                                       dest_addr1,
+                                       color);
+
+         sendPC;
+         receiveWR;
+
+         if (!(SEND_WR_DATA === make_worker_result(dest_option1,
+                                                   dest_addr1,
+                                                   color,
+                                                   0)))
+           raiseError('h70);
+      end
+   endtask
 
    integer i;
    
@@ -276,6 +357,8 @@ module tb_worker #
          setColorTest;
          syncTest;
          plusTest;
+         andTest;
+         nzTest;
       end
       $display("finish");
       $stop;

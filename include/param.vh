@@ -50,6 +50,8 @@ parameter INSN_SWITCH     = 10'h001,
 parameter INSN_SET_COLOR  = 10'h002,
 parameter INSN_SYNC       = 10'h003,
 parameter INSN_PLUS       = 10'h100,
+parameter INSN_AND        = 10'h101,
+parameter INSN_NZ         = 10'h102,
 
 // MA
 parameter MA_REF = 10'h000,

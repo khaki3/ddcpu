@@ -203,6 +203,8 @@
                      ['SET_COLOR  #x002]
                      ['SYNC       #x003]
                      ['+          #x100]
+                     ['AND        #x101]
+                     ['NZ         #x102]
                      [else        #f])
     (bitstyle
      [2  #b00]
@@ -226,7 +228,8 @@
 (define (op-binary op)
   (or (embinsn-binary   op)
       (memaccess-binary op)
-      (fncall-binary    op)))
+      (fncall-binary    op)
+      (error #"Undefined op: ~op")))
 
 (define (data-binary data base)
   (if (dest? data)
