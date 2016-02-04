@@ -1,3 +1,4 @@
+(use srfi-13)
 (use binary.io)
 
 (define (dest-option-binary->char b)
@@ -15,8 +16,13 @@
   #" 0x~(number->string d 16) ")
 
 (define (op-binary->string ob)
-  ;; todo
-  " A ")
+  (string-append
+   " "
+   (string-take-right 
+    (string-append
+     (make-string 12 #\0)
+     (number->string ob 2))
+    12)))
 
 (define (packet-binary->string pb)
   (string-append
